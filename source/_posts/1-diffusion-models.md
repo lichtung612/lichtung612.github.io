@@ -24,13 +24,15 @@ tag:
 
 学习一个网络，使得该网络生成的图像集的分布和真实的图像集的分布越接近越好（生成图像集的分布和真实图像集的分布的KL散度越小越好）。从最大似然估计角度理解，希望生成的图像数据集的分布中产生真实图像数据集中的样本的概率越大越好。
 
+如下图所示，从一个分布z中采样一个vector出来，通过网络，生成一张图片；所有采样到的vector生成的图片可以得到一个分布。目的是学习到这个网络，使生成图像的分布和真实图像分布接近。
+
 <img src="https://s21.ax1x.com/2024/03/28/pFoaEm4.jpg" alt="图像生成模型：从一个分布z中采样一个vector出来，通过网络，生成一张图片；所有采样到的vector生成的图片可以得到一个分布。目的是学习到这个网络，使生成图像的分布和真实图像分布接近。" style="zoom: 25%;" />
 
 ### 最大化最大似然估计=最小化KL散度
 
 从分布 $z$中采样vector,送入网络 $\theta$产生 $x$，可以得到一个分布 $P_\theta(x)$。真实的训练数据集的分布是 $P_{data}(x)$，从真实的分布中采样 $x^1,x^2,..,x^m$，目的是让从学习到的分布 $P_\theta(x)$产生 $x^i$的概率最大。$P_\theta(x^i)$即分布 $P_\theta$产生 $x^i$的概率。
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=MmRjYThlM2U2ZWZjMTE3OTc4YjQxMmYyOTE4MGYzYmJfbWxVa0xFdm9sVXVqcUZuUVlSVGwycHM0QWJzazAzWVJfVG9rZW46SGo5TWJEQ3ZCb0RBUkx4U2N6ZGN5dXU0bkhiXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+<img src="https://s21.ax1x.com/2024/03/28/pFow0eg.png" alt="img" style="zoom:67%;" />
 
 （推导思路：连乘->加log变成连加->转换成分布概率公式->减去真实分布->KL散度）
 
@@ -42,7 +44,7 @@ tag:
 
 **训练**
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=M2EyOTZiMzE5ODgxYjg0NjY4NmRmYTc2Zjk5YzE1OGRfZ0xndDRKVWU2SUdtaTYwUEFKTENHNDNGdFV3N01ZUmdfVG9rZW46RHB6bmJZRklXb2tnVXR4bEtPSmNoYURibkZmXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+![img](https://s21.ax1x.com/2024/03/28/pFowgS0.png)
 
 总体来看，训练过程将图像添加噪声变成噪声图，之后将噪声图和时间步输入模型，模型来预测噪声。
 
@@ -50,7 +52,7 @@ tag:
 
 **推理**
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=MTQyYWUyZDQ3YzBmYjFiZGIxZDQyNjAyNjFiN2UwYjlfU01YTGJST0ZTVnJEcklwSmI5Wmc0dXdSSVAyYUZqSjBfVG9rZW46STFPZmJkd3dSb2M0bHd4c2JUc2NFN0RCbmhmXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+![img](https://s21.ax1x.com/2024/03/28/pFow2lV.png)
 
 总体来说，给定一个噪声图，推理过程每一步预测噪声图的噪声，将噪声图去噪还原成更接近原图的图，之后重复步骤，生成越来越清晰的图像。
 
@@ -70,9 +72,11 @@ $x_0$是从训练图像数据分布 $q(x_0)$中采样的样本。
 
 令 $\alpha_t = 1 - \beta_t$，则公式变为 $x_t = \sqrt{\alpha_t}x_{t-1}+\sqrt{1-\alpha_t}\epsilon$
 
-继续推导，得到 $x_t = \sqrt{\alpha_t}x_{t-1}+\sqrt{1-\alpha_t}\epsilon \\= \sqrt{\alpha_t}(\sqrt{\alpha_{t-1}}x_{t-2}+\sqrt{1-\alpha_{t-1}}\epsilon)+\sqrt{1-\alpha_t}\epsilon\\=\sqrt{\alpha_t\alpha_{t-1}}x_{t-2}+\sqrt{\alpha_t(1-\alpha_{t-1})}\epsilon +\sqrt{1-\alpha_t}\epsilon$
+继续推导，得到 
 
-由于**正态分布的叠加性**， $\sqrt{\alpha_t(1-\alpha_{t-1})}\epsilon +\sqrt{1-\alpha_t}\epsilon$可以看作：
+$$\begin{align*}x_t &= \sqrt{\alpha_t}x_{t-1}+\sqrt{1-\alpha_t}\epsilon \\\\&= \sqrt{\alpha_t}(\sqrt{\alpha_{t-1}}x_{t-2}+\sqrt{1-\alpha_{t-1}}\epsilon)+\sqrt{1-\alpha_t}\epsilon\\\\&=\sqrt{\alpha_t\alpha_{t-1}}x_{t-2}+\sqrt{\alpha_t(1-\alpha_{t-1})}\epsilon +\sqrt{1-\alpha_t}\epsilon\end{align*}$$
+
+由于**正态分布的可加性**， $\sqrt{\alpha_t(1-\alpha_{t-1})}\epsilon +\sqrt{1-\alpha_t}\epsilon$可以看作：
 
  $X_1 \in \sqrt{\alpha_t(1-\alpha_{t-1})}\epsilon =N(0,\alpha_t(1-\alpha_{t-1}))$
 
@@ -94,7 +98,7 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
 
 从而可以看出，仅仅由 $x_0$即可一步得到 $x_t$。
 
-（推导过程思路：代入 $x_{t-1}$，展开式子，利用正态分布的叠加性）
+（推导过程思路：代入 $x_{t-1}$，展开式子，利用正态分布的可加性）
 
 ### 推理过程原理
 
@@ -128,11 +132,11 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
 
 由于 $x_{t-1}$是我们关注的变量，整理成 $x_{t-1}$的形式：
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=NmE4MWJmMWZkZjc2ZTNmZWRlYjAzZjIyYjE4OTdiOTNfc0FsSUJQSkdzMzQzZFNzWld0YzB0SzZrb2NBcEthM3RfVG9rZW46TEswemJZTEVPb0dNMWd4MWs0Y2NxT0RybmVlXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+![img](https://s21.ax1x.com/2024/03/28/pFowRyT.png)
 
 由正态分布满足 $f(x) \propto exp -\frac{x^2+u^2-2xu}{\sigma^2}$，则：
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=YTI0MTRkNzIwZjcxNjEwYzAyMGM1MzUxZWJhNTQ0NjFfRnJBejhORG9Wbm5kaEtCa3AxN2RwREpobmZtM1BoZWNfVG9rZW46VzdRQWJTc2pub2hhWU14THNHVmNPWUhFbktmXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+![img](https://s21.ax1x.com/2024/03/28/pFowWOU.png)
 
 又因为 $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$，把u里面的 $x_0$换掉，得：
 
@@ -156,7 +160,7 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
   - DDPM中的正向过程是固定好的人为设计的encoder，把原图变成噪声图的过程不是学习得到的
   - DDPM中潜在噪声图（隐变量）的维度和图像本身相同，而VAE中潜在空间一般会降低维度
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=ZGQwMzZiZThiM2U3Mjg1ZjAyNzFhOTFkYmYzZDQwNTlfVlBzV2NUOHJWTVd1Q05HOTE0bXcwQXhsV2pnUVhYMmxfVG9rZW46Ukc5QWJOaE9Bb0N5UGt4N1FoVGM4RTJkblZiXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+![img](https://s21.ax1x.com/2024/03/28/pFowhmF.png)
 
 #### 变分下界角度推导VAE和DDPM
 
@@ -170,19 +174,19 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
 
 第三行展开，得到右边是一项KL散度，KL散度一定大于等于0，则得到下界。
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=M2MzOWFiNWIxODFlN2UyNWU4M2ZlNTU0NWE4OWEzYjlfQWMzdFVkQmc2cmVvdG00RHhzTTFwVUtrc01mcEI5S3VfVG9rZW46TmdVWWJiRXBob0dxeFR4NDFzUmNHMjJxbjJjXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+<img src="https://s21.ax1x.com/2024/03/28/pFow4w4.png" alt="img" style="zoom:67%;" />
 
 - DDPM
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=N2ViYWU3YmI3YjY0Y2MxYTExMjAyODc0NDc2ZjE5N2JfZXZEam5rN0VFZTFuTjF6M3RIeWFwODVEM284YWNiTmdfVG9rZW46S052SGJQUVQ3b0kzZ3N4RXhNN2M4eGlJbjVkXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+<img src="https://s21.ax1x.com/2024/03/28/pFowTYR.png" alt="img" style="zoom:50%;" />
 
 进一步化简:
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=ZTRiYWE1YTRlNjEzZGM0YmEzMTBkNjBmZDRlZGU5NzBfRkhIT3RrVHR3NXN3N212eElTN004MkIwS3Z4d3hJREtfVG9rZW46Q25MVGJNWHE3bzJ2ekh4REJuM2NQRUJ1blNrXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/1.png)
 
 即优化下面这个式子，让这个式子越大越好：
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=ZjM0YzJlYmE3ZTUyNzk5MWQ3Y2VhMmQyOGJiYjE3ZGVfZHZla2poTUphUFd1cFdVT1FYak55dmhZM3Zkdk9qbThfVG9rZW46SmZxc2JwU2dUb0pnNmp4UUhHRGNjRUI4bmVjXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/2.png)
 
 其中该等式第二项是diffusion的前向过程，不是网络学习到的，所以可以不看；第一项和第三项的计算过程很像，以第三项为例，由“推理过程原理部分”推导出 $q(x_{t-1}|x_t,x_0)$是一个高斯分布，满足 $N（\frac{1}{\sqrt{\alpha_t}}(x_t-\frac{1-\alpha_t}{\sqrt{1-\bar\alpha_t}}\epsilon),\frac{(1-\alpha_t)(1-\bar\alpha_{t-1})}{1-\bar\alpha_t}）$。为了使最大似然概率更大，则应该使第三项KL散度越小越好，则 $P(x_{t-1}|x_t)$应该尽可能和分布 $N（\frac{1}{\sqrt{\alpha_t}}(x_t-\frac{1-\alpha_t}{\sqrt{1-\bar\alpha_t}}\epsilon),\frac{(1-\alpha_t)(1-\bar\alpha_{t-1})}{1-\bar\alpha_t}）$类似。得出和“推理过程原理”部分相同的结论。
 
@@ -190,7 +194,7 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
 
 扩散模型的核心在于训练噪音预测模型，采用一个基于residual block和attention block的U-Net模型。
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=NjMyYjk2YWE0OWQ0YzkwYzBiZDg2NmQ3NmM4MmJlNDBfTnpYS010MmVraVZnekpvVEZwUklWZjc4ZExoM0dGYmVfVG9rZW46VHFsSmI2T1dUb0EzRG94WEhxc2NyMWVDbjJkXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/3.png)
 
 U-Net属于encoder-decoder架构。每个stage包含2个residual block，部分stage还加入了自注意力模块增加网络全局建模能力。添加time embedding模块将时间步编码到网络中（采用和transformer相同的正余弦函数编码方式），具体来说，DDPM在各个残差块都引入了time embedding。
 
@@ -213,7 +217,7 @@ U-Net属于encoder-decoder架构。每个stage包含2个residual block，部分s
  t = torch.randint(0,timesteps,(batch_size,),device=device).long()
 ```
 
-1. 预测噪音并计算损失
+2. 预测噪音并计算损失
 
 ```Python
  loss = gaussian_diffusion.train_losses(model,images,t)  #images [b,c,h,w]; t [b]
@@ -251,7 +255,7 @@ emb = self.time_embed(timestep_embedding(timesteps,self.model_channels))
 
 和transformer类似，transformer中的位置编码函数：
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=M2MyNGY0YjA0YWEzYTE1NjkwMjk4NTEwODIzOTVkMjlfOGNzd1Q5WGF2Y0tIUFFyOHdKYWJ5bkhIU2FUTDJOeG9fVG9rZW46WHl0SGJLcmY2bzZFOGd4NnVoN2M1cXpkbmxjXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/4.png" alt="img" style="zoom:50%;" />
 
 相当于偶数位置采用sin函数，奇数位置采用cos函数。其中公共部分可以如下推导：
 
@@ -345,7 +349,7 @@ class ResidualBlock(TimestepBlock):
 img = torch.randn(shape,device=device)  #img [b,c,h,w]
 ```
 
-1. 循环timesteps个时间步，逐渐更新图像
+2. 循环timesteps个时间步，逐渐更新图像
 
 ```Python
  imgs = [] #一个len = timesteps的数组，数组里每一项的维度为[b,c,h,w],代表迭代过程每一步的batch里各个图像的样子
@@ -356,7 +360,7 @@ img = torch.randn(shape,device=device)  #img [b,c,h,w]
  return imgs
 ```
 
-1. 每个时间步内操作
+3. 每个时间步内操作
 
 - 整体流程
 
@@ -381,7 +385,7 @@ def p_sample(self, model, x_t, t, clip_denoised=True):
 
 推理算法中给出的公式如下，实际实现时采用的公式是未将 $x_0$替换的版本，并且对 $x_0$做了clip操作（将 $x_0$中的元素限制在-1和1之间），使用的是对数方差再取指数e（对数方差限制最小值为0）：
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=NjZhYjc4OTZkNzMzMWU4MGU1M2I3YzNmN2M0NDlmMjVfUDJNajdoeWxtcUhYQWNzWDFJUHFNaExQWlZIczA3a2ZfVG9rZW46VFpycWJFc3Bob1N6Q254NlZ5QWNTUUQ4blpkXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/9.png" alt="img" style="zoom:67%;" />
 
 ```Python
 model_mean, _, model_log_variance = self.p_mean_variance(model,x_t,t,
@@ -431,11 +435,11 @@ self.posterior_log_variance_clipped = torch.log(self.posterior_variance.clamp(mi
 
 - 生成结果
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=NTA5NWM5NmMxYTE1MGQyZWZmZmE5N2NiMDMxNDJiNjNfM2ZlUk9nSldiUlo3NG5jVXl4b0JUSm9aY204M2QzSTBfVG9rZW46SFlFQ2JENW92b243dW54ejczcmMzMVdNbnZoXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/6.png" alt="img" style="zoom: 50%;" />
 
 - 逐步结果
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=NDcwZmQ5NjY2NjJjYWRlYzQyZDQwZWQzYWFkYjU0ZmNfUWJsdnlPVWpxZXc5VlB3Z3ZDYk9RZm5POHpCWGZtS2ZfVG9rZW46VFlIN2JMaXMwb0JGdmt4enR0SWNPOGc3bks5XzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/7.png" alt="img" style="zoom: 50%;" />
 
 - 使用重参数化公式 $x_t =\sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$一步计算得到 $x_0$的结果
 
@@ -443,7 +447,7 @@ self.posterior_log_variance_clipped = torch.log(self.posterior_variance.clamp(mi
 
 可以看出，直接一步计算得到 $x_0$的结果是不行的。正向是一个加噪的过程，可以粗糙一点；但是逆向过程是一个复原图像的过程，需要更精细，否则误差会非常大。
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=MjM1NzlhODAyYzczZWE3ZmRmZGY0NGE1NGI1YTQwYjJfU2pFUkp4MktIcHFkdFl1UDFBU1BtdG95ZzNLV1RwQ3FfVG9rZW46Tmt4MmJzOTBPb2hpeGt4a0I2YmNkUGVVbmhiXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/8.png" alt="img" style="zoom:50%;" />
 
 ## DDIM
 
@@ -492,9 +496,9 @@ DDIM（denoising diffusion implicit models)和DDPM有相同的训练目标，但
 - 当 $\sigma = 0$，采样过程不再具有随机性，每个 $x_T$对应了确定的 $x_0$。
 - 若 $\sigma = \frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t}\beta_t$（  $= \frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t}(1-\frac{\bar\alpha_t}{\bar\alpha_{t-1}})$)，则是DDPM中采用的方差，此时**DDIM等价于DDPM**。
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=ZDcxZDVhY2VmZDAzNTVmZWZiODhjMjQ3MjAzM2M0ZThfbXZURGZ5VTZkV21udUEwTlNsR0lLWDYxV25PMVFPczNfVG9rZW46SnVPbmJpb0Uzb3JWOW94N1cyOGNSYWc2bmZjXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/10.png" alt="img" style="zoom: 50%;" />
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=ZTdkMjFlNDFiMzU4NDBkZTA3N2ZhODZiMjk4ZjM1MzhfMzFmeEZFZ3dVUUZwS2s0OHBhdGJVamplS2hsWkdpdGtfVG9rZW46VDFCWWI3V3Z1b2ZlY0h4TU1MWGNwRFFrbnNjXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/11.png" alt="img" style="zoom:50%;" />
 
 ### 代码
 
@@ -523,14 +527,14 @@ ddim_timestep_seq = ddim_timestep_seq + 1
 ddim_timestep_prev_seq = np.append(np.array([0]), ddim_timestep_seq[:-1])
 ```
 
-1. 采样噪声图
+2. 采样噪声图
 
 ```Python
  # start from pure noise (for each example in the batch)
  sample_img = torch.randn((batch_size, channels, image_size, image_size), device=device)
 ```
 
-1. 开始迭代还原图像，根据公式 $x_{t-1} = \sqrt{\bar\alpha_{t-1}}(\frac{x_t-\sqrt{1-\bar\alpha_t}\epsilon_\theta(x_t)}{\sqrt{\bar\alpha_t}})+\sqrt{1-\bar\alpha_{t-1}-\sigma^2}\epsilon_\theta(x_t)+\sigma\epsilon$，其中方差的公式采用 $\sigma = \eta\sqrt{\frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t}}\sqrt{1-\frac{\bar\alpha_t}{\bar\alpha_{t-1}}}$
+3. 开始迭代还原图像，根据公式 $x_{t-1} = \sqrt{\bar\alpha_{t-1}}(\frac{x_t-\sqrt{1-\bar\alpha_t}\epsilon_\theta(x_t)}{\sqrt{\bar\alpha_t}})+\sqrt{1-\bar\alpha_{t-1}-\sigma^2}\epsilon_\theta(x_t)+\sigma\epsilon$，其中方差的公式采用 $\sigma = \eta\sqrt{\frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t}}\sqrt{1-\frac{\bar\alpha_t}{\bar\alpha_{t-1}}}$
 
 ```Python
 sample_img = torch.randn((batch_size, channels, image_size, image_size), device=device)
@@ -566,7 +570,7 @@ for i in tqdm(reversed(range(0, ddim_timesteps)), desc='sampling loop time step'
 
 - 20步，ddim_eta=0时的生成效果：
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=MmJmZDA4NzQ1YTMzNTc0MjIzOTI4MDI0MTQ3MTk0NzBfWlJ2Y3V5NjhmYmtkQ04xMDkzOUtZYXZzMGFaN2FLaFdfVG9rZW46T3l0ZWJ1aFU4b1JqQXZ4NzVlM2NXNHFWbkdkXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/12.png" alt="img" style="zoom:50%;" />
 
 ### 特性
 
@@ -574,5 +578,5 @@ for i in tqdm(reversed(range(0, ddim_timesteps)), desc='sampling loop time step'
 
 当方差为0时，生成过程是确定的，只受 $x_T$影响。给定不同的 $x_T$，不同的采样步数下生成的图片都是类似的， $x_T$可以看作生成图片的隐编码信息。（在实际生成图片时可以控制 $x_T$不变，设置较小的采样步数，若生成的图片是想要的，再用更大的步数生成更精细的图片）。
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=NDI2NDU3MGZjNTJhMjI4MmE3MmE0NWEzYTQyMDIyMjVfSGo2U1QzOFhqalBZelNuMGJLVUluUzUzb1lNcXVrVTBfVG9rZW46QmFmaGI3alZnb2VuaW94RGRtc2NwNGdObkJmXzE3MTE2MzQxMzQ6MTcxMTYzNzczNF9WNA)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/13.png)
 
