@@ -1,15 +1,15 @@
 ---
-title: 扩散模型（三）| IDDPM
-date: 2024-01-03
+title: 扩散模型（三）| Classifier Guidance & Classifier-Free Guidance
+date: 2024-01-09
 mathjax: true
 cover: false
 category:
  - Diffusion model
 tag:
- - IDDPM
+ - Classifier-Free Guidance
 ---
 
-> 参考：
+> 学习笔记，学习资料：
 >
 > 1. https://zhuanlan.zhihu.com/p/660518657
 > 2. https://zhuanlan.zhihu.com/p/642519063
@@ -19,13 +19,13 @@ tag:
 
 思想：给定一个分类模型中存在的类别，让模型生成这个类别的东西。
 
-比如指定模型生成图像的类别是“狗”，模型就生成一张狗的图。所以这种方式是条件生成，条件是 $$y$$，扩散过程中的生成图像是 $$x_t$$。
+比如指定模型生成图像的类别是“狗”，模型就生成一张狗的图。所以这种方式是条件生成，条件是 $y$，扩散过程中的生成图像是 $x_t$。
 
 公式上，用贝叶斯定理将条件生成概率进行对数分解：
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=MGZmYmU4MjU5NjVmZjkzMzBlZDU0Yjc5ZTUzODY0ZDlfamh2OUZ3anRxa3NZcGtIOExTd1E0aHpnNzI2UklhSm9fVG9rZW46TTJsSWJSTU1tb21ac214dHdZcGNlaGJDbk1oXzE3MTE2NDUxMDM6MTcxMTY0ODcwM19WNA)
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/0.jpg" alt="img" style="zoom:80%;" />
 
-第二个等号后面最后一项消失了，因为当我们要求模型生成“狗”的图像时，扩散过程始终 $$y$$不变，对应的梯度也是0，可以抹掉。
+第二个等号后面最后一项消失了，因为当我们要求模型生成“狗”的图像时，扩散过程始终 $y$不变，对应的梯度也是0，可以抹掉。
 
 第三个等号后面两项中，第一项是扩散模型本身的梯度引导，新增的只能是第二项，即classifier guidance只需要额外添加一个classifier的梯度来引导。
 
@@ -52,7 +52,7 @@ tag:
      input += class_guidance * guidance_scale #把梯度加上去
 ```
 
-在推理过程，从 $$x_t$$得到 $$x_{t-1}$$后，将 $$x_{t-1}$$作为输入图片、 $$y$$作为标签送入分类模型，计算分类loss得到 $$x_{t-1}$$的梯度（正常的分类模型的参数是网络连接层的权重参数，这里面输入图像本身也是可学习的参数，并且对我们有用的就是输入图像本身的梯度），把梯度乘以guidance_scale系数，添加到 $$x_{t-1}$$上，得到更新后的图像。
+在推理过程，从 $x_t$得到 $x_{t-1}$后，将 $x_{t-1}$作为输入图片、 $y$作为标签送入分类模型，计算分类loss得到 $x_{t-1}$的梯度（正常的分类模型的参数是网络连接层的权重参数，这里面输入图像本身也是可学习的参数，并且对我们有用的就是输入图像本身的梯度），把梯度乘以guidance_scale系数，添加到 $x_{t-1}$上，得到更新后的图像。
 
 ## Classifier-Free Guidance
 
@@ -78,7 +78,7 @@ Classifier guidance只能用分类模型控制生成的类别，生成的类别�
          
      #classifier-free guidance引导
      noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)#拆成无条件和有条件的噪声
-     #把【无条件噪声指向有条件噪声】看作一个向量，根据guidance_scale的值放大这个向量
+     #把[无条件噪声指向有条件噪声]看作一个向量，根据guidance_scale的值放大这个向量
      noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text-noide_pred_uncond)
      
      #使用预测出的noise_pred和x_t计算得到x_{t-1}
@@ -91,19 +91,17 @@ Classifier guidance只能用分类模型控制生成的类别，生成的类别�
 
 总体而言，classifier-free guidance需要在训练过程中同时训练模型的两个能力，一个是有条件生成，一个是无条件生成。
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=MTRlZmEwNjRhYTQxOGE5ZDcwODk4MTI0ZTMzYWU3MjVfall4aElUZFNPZjl2SHFmcVBHWmxpWHNjNU9MYkZ3WEdfVG9rZW46WkF3YWJNbHNNb1N2c1F4Z1pnWWNyRTBybmtnXzE3MTE2NDUxMDM6MTcxMTY0ODcwM19WNA)
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/1.jpg" alt="img" style="zoom:50%;" />
 
 不同guidance_scale下的图像效果：
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=ZWY1MjgxNGFiZjExMTc0NmUzMjYwNjlkMzU0NjkwZGZfc2wzbXNaSVdra2Z5S1pBUzZFVnN1Nk5tN2gwYVB0WXpfVG9rZW46Uk90TGJiRDU3b1JiYkh4QkZnMmN6SDM4bmJkXzE3MTE2NDUxMDM6MTcxMTY0ODcwM19WNA)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/2.jpg)
 
 ### 推导
 
-（看不太懂）
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/3.jpg)
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=MmYxMjEyYWE4YjY3MDE4ZWRmMTEwNWYzNjI2ZmM0YjdfaUExenFtb1R2OFdtN3pkd2NRWFdQZjNoYjF2YkxiaUdfVG9rZW46RjdwWmIwR3I1b0VLcUh4QzdRdGNsUm0xbmZkXzE3MTE2NDUxMDM6MTcxMTY0ODcwM19WNA)
-
-### unet模型如何融入语义信息
+### U-Net模型如何融入语义信息
 
 #### CrossAttention
 
@@ -113,7 +111,7 @@ Classifier guidance只能用分类模型控制生成的类别，生成的类别�
 
 具体来说是把text embedding作为注意力机制中的key和value，把原始图片表征作为query。相当于计算每张图片和对应句子中单词的一个相似度得分，把得分转换成单词的权重，[权重乘以单词的embedding]加和作为最终的特征。
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=NTVmODQ2MjQ3M2UyZWYwMTRmZGQ5OTk0ZjM3OTRiYTdfZTJwVVNIS05rTHp0RmE2MlZMcnNCTVIwZjRlNW9sanhfVG9rZW46RFdxNWJNbkM1bzVjMUV4R2xFWmNCRGF1bm9iXzE3MTE2NDUxMDM6MTcxMTY0ODcwM19WNA)
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/4.jpg" alt="img" style="zoom:80%;" />
 
 ```Python
 import torch 
@@ -175,11 +173,11 @@ out = CrossAttn(x,context)
 >
 > 组归一化即对一个图片样本中的所有像素，按通道分组进行归一化。
 >
-> 自适应归一化可以表示为： $$AdaGN(h,y)=y_sGroupNorm(h)+y_b$$
+> 自适应归一化可以表示为： $AdaGN(h,y)=y_sGroupNorm(h)+y_b$
 >
 > 其中h是残差卷积块中第一个卷积层的输出，y_s和y_b分别是步数和图片分类的embedding向量经过线性层后的投影。实验发现，使用自适应组归一化能够进一步优化FID。
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=YjMxYzVmY2ZhMjlhNzcyNTI1M2IzYjk3YzA5ZDc1YWVfeTNycXkxcEZQWTgyTkl1QUE5ZGp4eXA0ek1JZVhCUmFfVG9rZW46VUVKYmIyYTUyb3ZtZEJ4cU15Q2N5d2ZLbnJjXzE3MTE2NDUxMDM6MTcxMTY0ODcwM19WNA)
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/5.jpg" alt="img" style="zoom:80%;" />
 
 >  code：https://github.com/huggingface/diffusers/blob/v0.27.2/src/diffusers/models/resnet.py#L353-L364
 
@@ -218,4 +216,4 @@ else:
 
 显然classifier-free guidance效果更好一些，既能生成无穷多的图像类别，又不需要重新训练一个基于噪声的分类模型。当前最常见的是classifier-free guidance。
 
-![img](https://mwlukz8553d.feishu.cn/space/api/box/stream/download/asynccode/?code=NWI3NDZmZjAzMDNmYWQ4YjQ1OTk1NTQ2OGUyMjQ3MjlfajdEeW5yN043SjZqNHU0WnhqcFJidHhnbzRUYk1aZGZfVG9rZW46TjEyZ2JrUWE3bzBjQ3B4dVFaTGM5cUFZbmJlXzE3MTE2NDUxMDM6MTcxMTY0ODcwM19WNA)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/6.jpg)

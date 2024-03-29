@@ -44,7 +44,7 @@ tag:
 
 **训练**
 
-![img](https://s21.ax1x.com/2024/03/28/pFowgS0.png)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/0.jpg)
 
 总体来看，训练过程将图像添加噪声变成噪声图，之后将噪声图和时间步输入模型，模型来预测噪声。
 
@@ -52,7 +52,7 @@ tag:
 
 **推理**
 
-![img](https://s21.ax1x.com/2024/03/28/pFow2lV.png)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/1.jpg)
 
 总体来说，给定一个噪声图，推理过程每一步预测噪声图的噪声，将噪声图去噪还原成更接近原图的图，之后重复步骤，生成越来越清晰的图像。
 
@@ -132,11 +132,11 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
 
 由于 $x_{t-1}$是我们关注的变量，整理成 $x_{t-1}$的形式：
 
-![img](https://s21.ax1x.com/2024/03/28/pFowRyT.png)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/2.jpg)
 
 由正态分布满足 $f(x) \propto exp -\frac{x^2+u^2-2xu}{\sigma^2}$，则：
 
-![img](https://s21.ax1x.com/2024/03/28/pFowWOU.png)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/3.jpg)
 
 又因为 $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$，把u里面的 $x_0$换掉，得：
 
@@ -160,7 +160,7 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
   - DDPM中的正向过程是固定好的人为设计的encoder，把原图变成噪声图的过程不是学习得到的
   - DDPM中潜在噪声图（隐变量）的维度和图像本身相同，而VAE中潜在空间一般会降低维度
 
-![img](https://s21.ax1x.com/2024/03/28/pFowhmF.png)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/4.jpg)
 
 #### 变分下界角度推导VAE和DDPM
 
@@ -182,11 +182,11 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
 
 进一步化简:
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/1.png)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/5.jpg)
 
 即优化下面这个式子，让这个式子越大越好：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/2.png)
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/6.jpg" alt="img" style="zoom:67%;" />
 
 其中该等式第二项是diffusion的前向过程，不是网络学习到的，所以可以不看；第一项和第三项的计算过程很像，以第三项为例，由“推理过程原理部分”推导出 $q(x_{t-1}|x_t,x_0)$是一个高斯分布，满足 $N（\frac{1}{\sqrt{\alpha_t}}(x_t-\frac{1-\alpha_t}{\sqrt{1-\bar\alpha_t}}\epsilon),\frac{(1-\alpha_t)(1-\bar\alpha_{t-1})}{1-\bar\alpha_t}）$。为了使最大似然概率更大，则应该使第三项KL散度越小越好，则 $P(x_{t-1}|x_t)$应该尽可能和分布 $N（\frac{1}{\sqrt{\alpha_t}}(x_t-\frac{1-\alpha_t}{\sqrt{1-\bar\alpha_t}}\epsilon),\frac{(1-\alpha_t)(1-\bar\alpha_{t-1})}{1-\bar\alpha_t}）$类似。得出和“推理过程原理”部分相同的结论。
 
@@ -194,7 +194,7 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
 
 扩散模型的核心在于训练噪音预测模型，采用一个基于residual block和attention block的U-Net模型。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/3.png)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/7.jpg)
 
 U-Net属于encoder-decoder架构。每个stage包含2个residual block，部分stage还加入了自注意力模块增加网络全局建模能力。添加time embedding模块将时间步编码到网络中（采用和transformer相同的正余弦函数编码方式），具体来说，DDPM在各个残差块都引入了time embedding。
 
@@ -578,5 +578,5 @@ for i in tqdm(reversed(range(0, ddim_timesteps)), desc='sampling loop time step'
 
 当方差为0时，生成过程是确定的，只受 $x_T$影响。给定不同的 $x_T$，不同的采样步数下生成的图片都是类似的， $x_T$可以看作生成图片的隐编码信息。（在实际生成图片时可以控制 $x_T$不变，设置较小的采样步数，若生成的图片是想要的，再用更大的步数生成更精细的图片）。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/13.png)
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/8.jpg)
 
