@@ -27,7 +27,7 @@ tag:
 
 ## 做法
 
-### （1）步骤
+### 步骤
 
 - 在原模型旁边增加一个支路，通过低秩分解（先降维再升维）来模拟参数的改变量
 - 训练时，原模型固定，只训练降维矩阵A和升维矩阵B
@@ -39,11 +39,9 @@ tag:
 
 **保证权重矩阵的种类的数量比起增加秩的维度r更重要，增加r并不一定能覆盖更加有意义的子空间。**
 
- 对于一般的任务，rank=1,2,4,8足矣，rank=1就挺好的。秩不是越大越好，大了可能会增加一些噪声（类似过拟合？）
+对于一般的任务，rank=1,2,4,8足矣，rank=1就挺好的。秩不是越大越好，大了可能会增加一些噪声。
 
-当下游任务与预训练任务的差异巨大时（如在英文上预训练，在中文上微调），使用很小的r应该不会有好效果，这时候去微调模型所有的参数应该会得到更好的效果，因为中英文的向量空间重合度应该不那么高，我们需要让更多的参数掉头，转向到适配中文的空间中去
-
-### （2）具体对模型的哪些部分做低秩分解
+### 具体对模型的哪些部分做低秩分解
 
 仅仅将LoRA应用于自注意力层中的投影矩阵（Q,K,V,O)，而MLP模块以及self-attention层以外的结构均不使用。
 
@@ -51,7 +49,7 @@ tag:
 
 ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/10-diffusion-models/1.jpg)
 
-### （3）LoRA代码实现
+### LoRA代码实现
 
 - 先用预训练权重 $W_0$对输入 $x$实施前向过程，得到 $W_0x$
 - 再将输入 $x$喂给低秩分解矩阵 $\Delta W=BA$，得到输出 $\Delta Wx = BAx$
@@ -263,26 +261,11 @@ def forward(self, x: torch.Tensor):
             self.merged = False
 ```
 
-## 其它PEFT方法
+## PEFT方法对比
 
 PEFT（parameter-efficient fine-tuning)参数高效的微调方法
 
-### (1) LoRA
-
-- 一个中心模型服务于多个下游任务，节省参数存储量，增加训练效率
-- 低秩矩阵可以合并到预训练权重中，多分支结构变成单分支，不引入额外的推理延迟
-- 与其它参数高效微调方法（Adapter,prefix-tuning)正交，可有效组合
-- 训练稳定，效果好
-
-Adapter Layer的缺点：
-
-- 新增的adapter层必须串行处理，增加了推理延迟
-
-prefix tuning的缺点：
-
-- 方法本身难以优化；方法需要在模型的输入序列中预留一部分用作可微调的prompt，从而限制了原始输入文本的句长
-
-### (2) Adapter Layers
+### Adapter Layers
 
 Adapter层嵌入在Transformer结构里面，具体位置是在feed-forward层之后。在训练时，固定住原模型参数，只对新增的adapter结构进行微调。
 
@@ -294,7 +277,7 @@ Adapter层内部：
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/10-diffusion-models/3.jpg" alt="img" style="zoom:50%;" />
 
-### (3) prefix tuning
+### prefix tuning
 
 在输入token之前构造一段任务相关的虚拟tokens作为prefix，训练时只更新prefix参数，而Transformer其他部分参数固定。
 
@@ -312,3 +295,20 @@ transform = torch.nn.Sequential(
     torch.nn.Linear(encoder_hidden_size, num_layers * 2 * token_dim),
 )
 ```
+
+### 对比
+
+Lora优点：
+
+- 一个中心模型服务于多个下游任务，节省参数存储量，增加训练效率
+- 低秩矩阵可以合并到预训练权重中，多分支结构变成单分支，不引入额外的推理延迟
+- 与其它参数高效微调方法（Adapter,prefix-tuning)正交，可有效组合
+- 训练稳定，效果好
+
+Adapter Layer的缺点：
+
+- 新增的adapter层必须串行处理，增加了推理延迟
+
+prefix tuning的缺点：
+
+- 方法本身难以优化；方法需要在模型的输入序列中预留一部分用作可微调的prompt，从而限制了原始输入文本的句长
