@@ -27,7 +27,7 @@ tag:
 
 ## 做法
 
-### （1）大概步骤
+### （1）步骤
 
 - 在原模型旁边增加一个支路，通过低秩分解（先降维再升维）来模拟参数的改变量
 - 训练时，原模型固定，只训练降维矩阵A和升维矩阵B
@@ -122,7 +122,7 @@ class MergedLinear(nn.Linear, LoraLayer):
             # 注意下这里 B 是用一维的分组卷积实现的
             '''
             nn.conv1d，kernel_size=1相当于mlp 
-            https://blog.csdn.net/qq_36323559/article/details/102937606）
+            https://blog.csdn.net/qq_36323559/article/details/102937606
             nn.conv1d,kernal_size=1,group=3相当于qkv矩阵分别与3个linear层投影，之后再concat起来
             如果做lora的是Q和V，Q的特征维度是d，V的特征维度是d，分别过线性层特征维度变成f，Q和V concat
             起来后特征维度变为2f；如果是2个合起来过一个线性层，过的线性层维度为[2d,2f],总参数量是4df；如果
@@ -263,7 +263,7 @@ def forward(self, x: torch.Tensor):
             self.merged = False
 ```
 
-## 与其它PEFT方法优势对比
+## 其它PEFT方法
 
 PEFT（parameter-efficient fine-tuning)参数高效的微调方法
 
