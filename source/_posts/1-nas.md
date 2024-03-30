@@ -83,15 +83,15 @@ tag:
 
 - 第一阶段（Supernet Training with Weight Entanglement)：
 
-​		在每个训练迭代中， 从搜索空间中均匀采样一个子网，更新相应权重，冻结住其余权重。
+  在每个训练迭代中， 从搜索空间中均匀采样一个子网，更新相应权重，冻结住其余权重。
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-NAS/7.jpg" alt="img" style="zoom:67%;" />
 
 - 第二阶段（Evolution Search under Resource Constraints)
 
-​		在训练完超网后，我们对此超网进行演化搜索算法，来获得最优子网。目标是最小化模型大小的情况下最大化分类准确率。
+  在训练完超网后，我们对此超网进行演化搜索算法，来获得最优子网。目标是最小化模型大小的情况下最大化分类准确率。
 
-​		初始，随机选择N个架构作为种子；其中的top k架构被选择作为父母，来通过交叉和变异产生下一代。
+  初始，随机选择N个架构作为种子；其中的top k架构被选择作为父母，来通过交叉和变异产生下一代。
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-NAS/8.jpg" alt="img" style="zoom:67%;" />
 
@@ -109,7 +109,7 @@ tag:
 
 - Subnet Performance without Retraining
 
-如果我们进一步在ImageNet上对搜索到的子网络进行微调或重新训练，性能提升非常小，甚至可以忽略不计。这种现象说明weight entanglement使得子集在超网络中得到了很好的训练，从而导致搜索到的Transformer不需要任何重新训练或微调，而超网络本身就是子网络排名的良好指标。
+  如果我们进一步在ImageNet上对搜索到的子网络进行微调或重新训练，性能提升非常小，甚至可以忽略不计。这种现象说明weight entanglement使得子集在超网络中得到了很好的训练，从而导致搜索到的Transformer不需要任何重新训练或微调，而超网络本身就是子网络排名的良好指标。
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-NAS/12.jpg" alt="img" style="zoom:67%;" />
 
@@ -175,9 +175,9 @@ Transformer encoder由4个连续的stage组成，逐步地降采样输入分辨�
 
 - expected error rate $\mathcal{Q}_e(\mathcal{A})$定义如下：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-NAS/19.jpg" alt="img" style="zoom:67%;" />
+  <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-NAS/19.jpg" alt="img" style="zoom:67%;" />
 
-其中， $e_\alpha$是在ImageNet验证集上的top-1错误率。g()是计算代价函数，c是计算资源限制。整个函数度量搜索空间的整体质量。在实践中，使用N个随机采样的架构来近似这一项。（**求N个随机采样的架构在ImageNet验证集上的错误率的平均值**）
+  其中， $e_\alpha$是在ImageNet验证集上的top-1错误率。g()是计算代价函数，c是计算资源限制。整个函数度量搜索空间的整体质量。在实践中，使用N个随机采样的架构来近似这一项。（**求N个随机采样的架构在ImageNet验证集上的错误率的平均值**）
 
 - top-tier error $\mathcal{Q}_t(\mathcal{A})$：**在资源限制下top50候选架构的平均错误率**，表示搜索空间的性能上界。
 
@@ -186,13 +186,16 @@ Transformer encoder由4个连续的stage组成，逐步地降采样输入分辨�
 ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-NAS/20.jpg)
 
 - 首先初始化一个搜索空间 $\mathcal{A}^{(0)}$,比如（number of blocks: {2,3,4},embedding dimension:{224,256,288},window size:{7,14},number of heads:{3,3.5,4},MLP ratio:{7,8,9},Q-K-V dimensions:{224,256,288})
+
 - 优化该初始搜索空间的权重至收敛
+
 - 随机从该搜索空间采样N个架构
+
 - 将超网分解成子空间。根据**搜索维度**和**阶段**来分解搜索空间 $\mathcal{A}^{(t)}$。相应的子空间表示为 $S_1^{t},S_2^{t},...,S_D^{t}$,其中D表示stage和搜索维度的点积。搜索空间为此可以表示为子空间的笛卡尔乘积：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-NAS/21.jpg" alt="img" style="zoom:50%;" />
+  <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-NAS/21.jpg" alt="img" style="zoom:50%;" />
 
-之后，通过更新每一个 $S_i^{(t)}$,将搜索空间 $\mathcal{A}^{(t)}$演化成更好的 $\mathcal{A}^{(t+1)}$。
+  之后，通过更新每一个 $S_i^{(t)}$,将搜索空间 $\mathcal{A}^{(t)}$演化成更好的 $\mathcal{A}^{(t+1)}$。
 
 - 对于子空间 $S_i^{(t)}$,对该子空间中的每一个选择从N个架构集合中找到相应的子空间架构，计算相应的E-T Error。（比如，对于blocks指标， $S_{blocks} ^{(t)} = \{2,3,4\}$,计算分别 $v_l^{(t)}=2$、3、4时相应模型架构的E-T Error，E-T Error和 $v_l^{(t)}$的关系可以用一条线性直线来拟合。）
 - 优化此子空间

@@ -110,15 +110,13 @@ RepVGG架构如下：
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/9.jpg" alt="img" style="zoom:67%;" />
 
-## Lightweight CNNs
-
-### RepViT
+## RepViT
 
 > RepViT-2307: Revisiting Mobile CNN From ViT Perspective
 >
 > https://arxiv.org/pdf/2307.09283.pdf
 
-#### 动机
+### 动机
 
 最近，轻量级ViT相比较于轻量级CNN在资源受限型设备上证明了卓越的性能和低的延迟。这个提升经常被归功于多头自注意力机制，多头自注意力机制可以让模型学习全局特征表示。然而，**轻量级ViT和轻量级CNN在模型架构上的区别没有被充分审视**。
 
@@ -128,15 +126,15 @@ RepVGG架构如下：
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/10.jpg" alt="img" style="zoom:50%;" />
 
-#### 背景
+### 背景
 
-##### MobileNet v3
+#### MobileNet v3
 
 Mobilenet V3 block: Inverted residual + Squeeze-and-Excite
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/11.jpg" alt="img" style="zoom:67%;" />
 
-##### MetaFormer
+#### MetaFormer
 
 > MetaFormer: MetaFormer Is Actually What You Need for Vision
 >
@@ -146,9 +144,9 @@ Mobilenet V3 block: Inverted residual + Squeeze-and-Excite
 
 ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/12.jpg)
 
-#### 架构
+### 架构
 
-##### 概览
+#### 概览
 
 主要根据latency和top-1 accuracy来设计选择模型架构，逐步modernize MobileNetV3-L。
 
@@ -156,14 +154,14 @@ Mobilenet V3 block: Inverted residual + Squeeze-and-Excite
 
 ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/14.jpg)
 
-##### 对齐训练策略
+#### 对齐训练策略
 
 - MobileNetV3-L:采用CNN的训练策略（RMSPropOptimizer with 0.9 momentum for 600 epochs等设置）
 - RepViT: 为了公平比较，采用ViT的训练策略（和DeiT类似，使用Adam optimizer,cosine annealing learning rate schedule for 300 epochs等设置）。
 
-##### **Block design**
+#### **Block design**
 
-###### 分离token mixer和channel mixer
+**1. 分离token mixer和channel mixer**
 
 根据MetaFormer, ViT的有效性存在于它们的token mixer和channel mixer架构，而不是特定的token mixer。为此，作者**将MobileNetV3 block改成MetaFormer结构**。
 
@@ -176,22 +174,22 @@ Mobilenet V3 block: Inverted residual + Squeeze-and-Excite
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/15.jpg" alt="img" style="zoom:67%;" />
 
-###### 减小expansion ratio，增加width
+**2. 减小expansion ratio，增加width**
 
 - Expansion ratio: 1x1升维卷积将特征矩阵升维的倍数；在MobileNetV3-L中，不同stage升维倍数从2.3到6，**通道数量越大模块越冗余**。因此RepViT将expansion ratio减少为2。
 - Network width：1x1降维卷积后每个block输出的维度。RepViT增加了每个block的输出维度。
 
-##### **Macro design**
+#### **Macro design**
 
-###### Early convolutions for stem
+**1. Early convolutions for stem**
 
 Early convolutions：在轻量级ViT中被广泛采用的stem，用堆叠的stride=2的3x3卷积处理。相比MobileNetV3-L中复杂的stem,更简洁，降低延迟并增加了准确率。
 
-如图所示，(a)MobileNetV3-L的stem (b)RepViT的stem：
+如图所示，(a) MobileNetV3-L的stem  (b) RepViT的stem：
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/2.jpg" alt="img" style="zoom:67%;" />
 
-###### Deeper downsampling layers
+**2. Deeper downsampling layers**
 
 研究表明**单独的下采样层有助于增加网络深度，并减轻分辨率降低带来的信息损失**，这通常被轻量级ViT采用。
 
@@ -201,15 +199,15 @@ RepViT：用stride=2的depthwise卷积完成降采样，之后2个1x1卷积增�
 
 更进一步，RepViT首先在深度卷积后增加单独的1*1卷积变更通道数，以使降采样层与块结构解耦。在此基础上，降采样层由前面的RepViT块及后面的FFN进一步加深。
 
-(a)MobileNetV3-L降采样层(b)采用RepViT块设计后的降采样层(c)RepViT最终降采样层结构
+下图：(a)MobileNetV3-L降采样层 (b)采用RepViT块设计后的降采样层 (c)RepViT最终降采样层结构
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/17.jpg" alt="img" style="zoom:67%;" />
 
-###### Simple classifier
+**3. Simple classifier**
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/18.jpg" alt="img" style="zoom:67%;" />
 
-###### Overall stage ratio
+**4. Overall stage ratio**
 
 Stage ratio表示不同阶段中块数的比率，暗示各阶段的计算分布。
 
@@ -219,22 +217,22 @@ MobileNetV3-L：1:2:5:2
 
 RepViT：1:1:7:1（network depth: 2:2:14:2)
 
-##### **Micro design**
+#### **Micro design**
 
-###### Kernel size selection
+**1. Kernel size selection**
 
 - 大尺寸的卷积核的计算复杂度和MAC更高，对移动设备不友好；
 - 与3x3卷积相比，编译器和计算库通常不会对较大的卷积核进行高度优化
 
 RepViT将卷积核尺寸全部设定为3x3（MobileNetV3中有一部分卷积核是5x5）
 
-###### Squeeze-and-excitation layer placement
+**2. Squeeze-and-excitation layer placement**
 
 与卷积相比，自注意模块的一个优点是能够根据输入调整权重，即具有数据驱动属性。作为一种通道式的attention模块，SE层可以在缺乏数据驱动属性的情况下补偿卷积的限制，带来更好的性能。
 
 MobileNetV3-L在某些块中包含SE层，主要关注后两个阶段。然而研究表明**与具有更高分辨率的阶段相比，具有低分辨率的阶段从SE提供的全局平均池操作中获得的精度益处较小**。同时，随着性能的提高，SE层也引入了不可忽略的计算成本。因此，RepVit设计了一种策略，在所有阶段的cross-block中利用SE层，以最小的延迟增量最大限度地提高准确性。
 
-#### 实验
+### 实验
 
 **Image Classification**
 
@@ -243,17 +241,17 @@ MobileNetV3-L在某些块中包含SE层，主要关注后两个阶段。然而�
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/19.jpg" alt="img" style="zoom:67%;" />
 
-### MobileOne
+## MobileOne
 
 > MobileOne-2206: An Improved One millisecond Mobile Backbone:https://arxiv.org/pdf/2206.04040.pdf
 
-#### 动机
+### 动机
 
 移动设备backbones通常针对FLOP或Parameter等指标进行优化。然而，当部署在移动设备上时，这些指标可能与网络的延迟不太相关。为此，本文通过在移动设备上部署模型进行不断调试分析，**针对iphone12架构**设计了一种高效的主干MobileOne，其变体在iPhone 12上的推理时间低于1毫秒，在ImageNet上的最高准确率为75.9%。
 
-#### 分析
+### 分析
 
-##### 激活函数
+#### 激活函数
 
 不同激活函数对延迟的影响很大，MobileOne选择ReLU激活函数。
 
@@ -261,7 +259,7 @@ MobileNetV3-L在某些块中包含SE层，主要关注后两个阶段。然而�
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/20.jpg" alt="img" style="zoom:67%;" />
 
-##### Architectural Blocks
+#### Architectural Blocks
 
 影响运行时性能的两个关键因素是**内存访问成本(MAC）**和**并行度**。
 
@@ -273,9 +271,9 @@ MobileNetV3-L在某些块中包含SE层，主要关注后两个阶段。然而�
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/21.jpg" alt="img" style="zoom:80%;" />
 
-#### 架构
+### 架构
 
-##### MobileOne Block
+#### MobileOne Block
 
 和MobileNet-V1类似，由depthwise卷积和pointwise卷积构成，只不过增加了trivial over-parameterization branches。
 
@@ -293,7 +291,7 @@ MobileNetV3-L在某些块中包含SE层，主要关注后两个阶段。然而�
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/24.jpg" alt="img" style="zoom:67%;" />
 
-##### Model Scaling
+#### Model Scaling
 
 ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/25.jpg)
 
@@ -301,7 +299,7 @@ MobileOne-S1比和它大3倍的RepVGG-B0性能更好：
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/26.jpg" alt="img" style="zoom:67%;" />
 
-##### Training
+#### Training
 
 小模型需要较少的正则化来防止过拟合，在训练过程中逐渐减小权重衰减正则化更为有效。
 
@@ -309,6 +307,6 @@ MobileOne-S1比和它大3倍的RepVGG-B0性能更好：
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/27.jpg" alt="img" style="zoom:80%;" />
 
-#### 实验
+### 实验
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/28.jpg" alt="img" style="zoom:80%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/28.jpg" alt="img" style="zoom: 67%;" />

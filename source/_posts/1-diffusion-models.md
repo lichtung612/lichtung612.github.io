@@ -32,7 +32,7 @@ tag:
 
 从分布 $z$中采样vector,送入网络 $\theta$产生 $x$，可以得到一个分布 $P_\theta(x)$。真实的训练数据集的分布是 $P_{data}(x)$，从真实的分布中采样 $x^1,x^2,..,x^m$，目的是让从学习到的分布 $P_\theta(x)$产生 $x^i$的概率最大。$P_\theta(x^i)$即分布 $P_\theta$产生 $x^i$的概率。
 
-<img src="https://s21.ax1x.com/2024/03/28/pFow0eg.png" alt="img" style="zoom:67%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/14.PNG" alt="img" style="zoom:67%;" />
 
 （推导思路：连乘->加log变成连加->转换成分布概率公式->减去真实分布->KL散度）
 
@@ -174,11 +174,11 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
 
 第三行展开，得到右边是一项KL散度，KL散度一定大于等于0，则得到下界。
 
-<img src="https://s21.ax1x.com/2024/03/28/pFow4w4.png" alt="img" style="zoom:67%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/15.png" alt="img" style="zoom:67%;" />
 
 - DDPM
 
-<img src="https://s21.ax1x.com/2024/03/28/pFowTYR.png" alt="img" style="zoom:50%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/16.png" alt="img" style="zoom:50%;" />
 
 进一步化简:
 
@@ -435,11 +435,11 @@ self.posterior_log_variance_clipped = torch.log(self.posterior_variance.clamp(mi
 
 - 生成结果
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/6.png" alt="img" style="zoom: 50%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/6.png" alt="img" style="zoom: 33%;" />
 
 - 逐步结果
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/7.png" alt="img" style="zoom: 50%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/7.png" alt="img" style="zoom: 33%;" />
 
 - 使用重参数化公式 $x_t =\sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$一步计算得到 $x_0$的结果
 
@@ -447,7 +447,7 @@ self.posterior_log_variance_clipped = torch.log(self.posterior_variance.clamp(mi
 
 可以看出，直接一步计算得到 $x_0$的结果是不行的。正向是一个加噪的过程，可以粗糙一点；但是逆向过程是一个复原图像的过程，需要更精细，否则误差会非常大。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/8.png" alt="img" style="zoom:50%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/8.png" alt="img" style="zoom: 25%;" />
 
 ## DDIM
 
