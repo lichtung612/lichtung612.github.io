@@ -7,7 +7,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/image/avatar.jpg">
 <meta property="article:published_time" content="2024-01-02T16:00:00.000Z">
-<meta property="article:modified_time" content="2024-03-29T12:28:58.178Z">
+<meta property="article:modified_time" content="2024-03-30T14:20:54.342Z">
 <meta property="article:author" content="梦游娃娃">
 <meta property="article:tag" content="DDPM">
 <meta name="twitter:card" content="summary">
@@ -57,7 +57,7 @@
   isHome: false,
   isHighlightShrink: false,
   isToc: true,
-  postUpdate: '2024-03-29 20:28:58'
+  postUpdate: '2024-03-30 22:20:54'
 }</script><noscript><style type="text/css">
   #nav {
     opacity: 1
@@ -161,7 +161,7 @@
       }
     }
     detectApple()
-    })(window)</script><meta name="generator" content="Hexo 5.4.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/image/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">13</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><hr/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/image/cover.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="披星戴月思想家"><span class="site-name">披星戴月思想家</span></a></span><div id="menus"><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">扩散模型（一）| DDPM &amp; DDIM</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-01-02T16:00:00.000Z" title="发表于 2024-01-03 00:00:00">2024-01-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-03-29T12:28:58.178Z" title="更新于 2024-03-29 20:28:58">2024-03-29</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Diffusion-model/">Diffusion model</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="扩散模型（一）| DDPM &amp; DDIM"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><blockquote>
+    })(window)</script><meta name="generator" content="Hexo 5.4.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/image/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">13</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><hr/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/image/cover.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="披星戴月思想家"><span class="site-name">披星戴月思想家</span></a></span><div id="menus"><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">扩散模型（一）| DDPM &amp; DDIM</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-01-02T16:00:00.000Z" title="发表于 2024-01-03 00:00:00">2024-01-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-03-30T14:20:54.342Z" title="更新于 2024-03-30 22:20:54">2024-03-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Diffusion-model/">Diffusion model</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="扩散模型（一）| DDPM &amp; DDIM"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><blockquote>
 <p>学习笔记，主要参考：</p>
 <ol>
 <li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/666552214">https://zhuanlan.zhihu.com/p/666552214</a></li>
@@ -178,7 +178,7 @@
 <img src="https://s21.ax1x.com/2024/03/28/pFoaEm4.jpg" alt="图像生成模型：从一个分布z中采样一个vector出来，通过网络，生成一张图片；所有采样到的vector生成的图片可以得到一个分布。目的是学习到这个网络，使生成图像的分布和真实图像分布接近。" style="zoom: 25%;" />
 
 <h3 id="最大化最大似然估计-最小化KL散度"><a href="#最大化最大似然估计-最小化KL散度" class="headerlink" title="最大化最大似然估计=最小化KL散度"></a>最大化最大似然估计=最小化KL散度</h3><p>从分布 $z$中采样vector,送入网络 $\theta$产生 $x$，可以得到一个分布 $P_\theta(x)$。真实的训练数据集的分布是 $P_{data}(x)$，从真实的分布中采样 $x^1,x^2,..,x^m$，目的是让从学习到的分布 $P_\theta(x)$产生 $x^i$的概率最大。$P_\theta(x^i)$即分布 $P_\theta$产生 $x^i$的概率。</p>
-<img src="https://s21.ax1x.com/2024/03/28/pFow0eg.png" alt="img" style="zoom:67%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/14.PNG" alt="img" style="zoom:67%;" />
 
 <p>（推导思路：连乘-&gt;加log变成连加-&gt;转换成分布概率公式-&gt;减去真实分布-&gt;KL散度）</p>
 <p>由上述推导可以得出最大化最大似然估计等价于最小化KL散度。</p>
@@ -260,12 +260,12 @@
 <p>推导如下，其中，因为 $\int_zq(z|x)dz=1$，所以第一行 $logP_\theta(x)=\int_zq(z|x)logP(x)dz$成立。</p>
 <p>第二行利用贝叶斯公式展开，分子分母上下添加 $q(z|x)$。</p>
 <p>第三行展开，得到右边是一项KL散度，KL散度一定大于等于0，则得到下界。</p>
-<img src="https://s21.ax1x.com/2024/03/28/pFow4w4.png" alt="img" style="zoom:67%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/15.png" alt="img" style="zoom:67%;" />
 
 <ul>
 <li>DDPM</li>
 </ul>
-<img src="https://s21.ax1x.com/2024/03/28/pFowTYR.png" alt="img" style="zoom:50%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/16.png" alt="img" style="zoom:50%;" />
 
 <p>进一步化简:</p>
 <p><img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/5.jpg" alt="img"></p>
@@ -354,12 +354,12 @@
 <ul>
 <li>生成结果</li>
 </ul>
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/6.png" alt="img" style="zoom: 50%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/6.png" alt="img" style="zoom: 33%;" />
 
 <ul>
 <li>逐步结果</li>
 </ul>
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/7.png" alt="img" style="zoom: 50%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/7.png" alt="img" style="zoom: 33%;" />
 
 <ul>
 <li>使用重参数化公式 $x_t =\sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$一步计算得到 $x_0$的结果</li>
@@ -368,7 +368,7 @@
 <p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/583158958">https://www.zhihu.com/question/583158958</a></p>
 </blockquote>
 <p>可以看出，直接一步计算得到 $x_0$的结果是不行的。正向是一个加噪的过程，可以粗糙一点；但是逆向过程是一个复原图像的过程，需要更精细，否则误差会非常大。</p>
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/8.png" alt="img" style="zoom:50%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/8.png" alt="img" style="zoom: 25%;" />
 
 <h2 id="DDIM"><a href="#DDIM" class="headerlink" title="DDIM"></a>DDIM</h2><p>DDPM的推理速度过慢，需要设置较长的扩散步数才能得到好的效果。其无法避免迭代过程，因为其本身是一个<strong>马尔可夫链</strong>，即前后时刻数据有非常紧密的绑定关系，无法进行跳跃预测。</p>
 <p>DDIM（denoising diffusion implicit models)和DDPM有相同的训练目标，但是<strong>不再限制扩散过程必须是一个马尔可夫链</strong>，使得DDIM可以采用更大的采样步数来加速生成过程。DDIM的另外一个特点是当 $\sigma$取值为0时，从一个随机噪音生成样本的过程是一个<strong>确定的过程</strong>（中间没有加入随机噪音）。DDIM<strong>无需重新训练DDPM</strong>（无需改变前向加噪过程），只对采样器进行修改即可，修改后的采样器能够大幅增加采样速度。</p>
