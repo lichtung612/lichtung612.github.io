@@ -26,7 +26,7 @@ tag:
 
 如下图所示，从一个分布z中采样一个vector出来，通过网络，生成一张图片；所有采样到的vector生成的图片可以得到一个分布。目的是学习到这个网络，使生成图像的分布和真实图像分布接近。
 
-<img src="https://s21.ax1x.com/2024/03/28/pFoaEm4.jpg" alt="图像生成模型：从一个分布z中采样一个vector出来，通过网络，生成一张图片；所有采样到的vector生成的图片可以得到一个分布。目的是学习到这个网络，使生成图像的分布和真实图像分布接近。" style="zoom: 25%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/17.PNG" alt="图像生成模型：从一个分布z中采样一个vector出来，通过网络，生成一张图片；所有采样到的vector生成的图片可以得到一个分布。目的是学习到这个网络，使生成图像的分布和真实图像分布接近。" style="zoom: 50%;" />
 
 ### 最大化最大似然估计=最小化KL散度
 
@@ -166,7 +166,7 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
 
 >  变分下界：variational lower bound, VLB
 
-- VAE
+1. VAE
 
 推导如下，其中，因为 $\int_zq(z|x)dz=1$，所以第一行 $logP_\theta(x)=\int_zq(z|x)logP(x)dz$成立。
 
@@ -176,7 +176,7 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/15.png" alt="img" style="zoom:67%;" />
 
-- DDPM
+2. DDPM
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/16.png" alt="img" style="zoom:50%;" />
 
@@ -211,13 +211,13 @@ U-Net属于encoder-decoder架构。每个stage包含2个residual block，部分s
 
 关键代码：
 
-1. 对batch里每个样本随机采样一个时间步t
+（1）对batch里每个样本随机采样一个时间步t
 
 ```Python
- t = torch.randint(0,timesteps,(batch_size,),device=device).long()
+t = torch.randint(0,timesteps,(batch_size,),device=device).long()
 ```
 
-2. 预测噪音并计算损失
+（2）预测噪音并计算损失
 
 ```Python
  loss = gaussian_diffusion.train_losses(model,images,t)  #images [b,c,h,w]; t [b]
@@ -247,109 +247,111 @@ U-Net属于encoder-decoder架构。每个stage包含2个residual block，部分s
 
 - timesteps([b])首先被正余弦位置编码编码([b,model_channels])，之后经过2个linear层([b,model_channels*4])
 
-```
-emb = self.time_embed(timestep_embedding(timesteps,self.model_channels))
-```
+  ```python
+  emb = self.time_embed(timestep_embedding(timesteps,self.model_channels))
+  ```
 
 - 正余弦位置编码
 
-和transformer类似，transformer中的位置编码函数：
+  和transformer类似，transformer中的位置编码函数：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/4.png" alt="img" style="zoom:50%;" />
+  <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/4.png" alt="img" style="zoom:50%;" />
 
-相当于偶数位置采用sin函数，奇数位置采用cos函数。其中公共部分可以如下推导：
+  相当于偶数位置采用sin函数，奇数位置采用cos函数。其中公共部分可以如下推导：
 
- $10000^{\frac{2i}{d}} = e^{log(10000^{\frac{2i}{d}})} = e^{\frac{2i}{d}log1000}$
+  $10000^{\frac{2i}{d}} = e^{log(10000^{\frac{2i}{d}})} = e^{\frac{2i}{d}log1000}$
 
-此外，ddpm中采用每个位置的dim维度中前一半维度使用cos编码，后一半维度使用sin编码的方式。
+  此外，ddpm中采用每个位置的dim维度中前一半维度使用cos编码，后一半维度使用sin编码的方式。
 
-```Python
-# use sinusoidal position embedding to encode time step (https://arxiv.org/abs/1706.03762)   
-def timestep_embedding(timesteps, dim, max_period=10000):
-    """
-    Create sinusoidal timestep embeddings.
-    :param timesteps: a 1-D Tensor of N indices, one per batch element.
-                      These may be fractional.
-    :param dim: the dimension of the output.
-    :param max_period: controls the minimum frequency of the embeddings.
-    :return: an [N x dim] Tensor of positional embeddings.
-    """
-    half = dim // 2
-    freqs = torch.exp(
-        -math.log(max_period) * torch.arange(start=0, end=half, dtype=torch.float32) / half
-    ).to(device=timesteps.device)
-    args = timesteps[:, None].float() * freqs[None]
-    embedding = torch.cat([torch.cos(args), torch.sin(args)], dim=-1)
-    if dim % 2:
-        embedding = torch.cat([embedding, torch.zeros_like(embedding[:, :1])], dim=-1)
-    return embedding
-```
+  ```python
+  # use sinusoidal position embedding to encode time step (https://arxiv.org/abs/1706.03762)   
+  def timestep_embedding(timesteps, dim, max_period=10000):
+      """
+      Create sinusoidal timestep embeddings.
+      :param timesteps: a 1-D Tensor of N indices, one per batch element.
+                        These may be fractional.
+      :param dim: the dimension of the output.
+      :param max_period: controls the minimum frequency of the embeddings.
+      :return: an [N x dim] Tensor of positional embeddings.
+      """
+      half = dim // 2
+      freqs = torch.exp(
+          -math.log(max_period) * torch.arange(start=0, end=half, dtype=torch.float32) / half
+      ).to(device=timesteps.device)
+      args = timesteps[:, None].float() * freqs[None]
+      embedding = torch.cat([torch.cos(args), torch.sin(args)], dim=-1)
+      if dim % 2:
+          embedding = torch.cat([embedding, torch.zeros_like(embedding[:, :1])], dim=-1)
+      return embedding
+  ```
 
 - time_embed层：
 
-```Python
-time_embed_dim = model_channels * 4
-self.time_embed = nn.Sequential(
-     nn.Linear(model_channels, time_embed_dim),
-     nn.SiLU(),
-     nn.Linear(time_embed_dim, time_embed_dim),
-)
-```
+  ```python
+  time_embed_dim = model_channels * 4
+  self.time_embed = nn.Sequential(
+       nn.Linear(model_channels, time_embed_dim),
+       nn.SiLU(),
+       nn.Linear(time_embed_dim, time_embed_dim),
+  )
+  ```
+
+  
 
 - 时间步信息在每个残差块注入
 
-采用将时间步嵌入和图像特征直接相加进行融合的方式
+  采用将时间步嵌入和图像特征直接相加进行融合的方式
 
-```Python
- # Residual block
-class ResidualBlock(TimestepBlock):
-    def __init__(self, in_channels, out_channels, time_channels, dropout):
-        super().__init__()
-        self.conv1 = nn.Sequential(
-            norm_layer(in_channels),
-            nn.SiLU(),
-            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
-        )
-        
-        # pojection for time step embedding
-        self.time_emb = nn.Sequential(
-            nn.SiLU(),
-            nn.Linear(time_channels, out_channels)
-        )
-        
-        self.conv2 = nn.Sequential(
-            norm_layer(out_channels),
-            nn.SiLU(),
-            nn.Dropout(p=dropout),
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1)
-        )
-
-        if in_channels != out_channels:
-            self.shortcut = nn.Conv2d(in_channels, out_channels, kernel_size=1)
-        else:
-            self.shortcut = nn.Identity()
-
-    def forward(self, x, t):
-        """
-        `x` has shape `[batch_size, in_dim, height, width]`
-        `t` has shape `[batch_size, time_dim]`
-        """
-        h = self.conv1(x)
-        # Add time step embeddings
-        h += self.time_emb(t)[:, :, None, None]
-        h = self.conv2(h)
-        return h + self.shortcut(x)
-```
+  ```python
+   # Residual block
+  class ResidualBlock(TimestepBlock):
+      def __init__(self, in_channels, out_channels, time_channels, dropout):
+          super().__init__()
+          self.conv1 = nn.Sequential(
+              norm_layer(in_channels),
+              nn.SiLU(),
+              nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
+          )
+          
+          # pojection for time step embedding
+          self.time_emb = nn.Sequential(
+              nn.SiLU(),
+              nn.Linear(time_channels, out_channels)
+          )
+          
+          self.conv2 = nn.Sequential(
+              norm_layer(out_channels),
+              nn.SiLU(),
+              nn.Dropout(p=dropout),
+              nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1)
+          )
+  
+          if in_channels != out_channels:
+              self.shortcut = nn.Conv2d(in_channels, out_channels, kernel_size=1)
+          else:
+              self.shortcut = nn.Identity()
+  
+      def forward(self, x, t):
+          """
+          `x` has shape `[batch_size, in_dim, height, width]`
+          `t` has shape `[batch_size, time_dim]`
+          """
+          h = self.conv1(x)
+          # Add time step embeddings
+          h += self.time_emb(t)[:, :, None, None]
+          h = self.conv2(h)
+          return h + self.shortcut(x)
+  ```
 
 #### 推理过程
 
-1. 生成纯噪音图像
+（1）生成纯噪音图像
 
 ```Python
 img = torch.randn(shape,device=device)  #img [b,c,h,w]
 ```
 
-2. 循环timesteps个时间步，逐渐更新图像
+（2）循环timesteps个时间步，逐渐更新图像
 
 ```Python
  imgs = [] #一个len = timesteps的数组，数组里每一项的维度为[b,c,h,w],代表迭代过程每一步的batch里各个图像的样子
@@ -360,78 +362,80 @@ img = torch.randn(shape,device=device)  #img [b,c,h,w]
  return imgs
 ```
 
-3. 每个时间步内操作
+（3）每个时间步内操作
 
 - 整体流程
 
-首先计算均值和对数方差；采样噪音，其中因为噪音在最后一步的时候为0，所以使用一个nonzero_mask矩阵来判断
+  首先计算均值和对数方差；采样噪音，其中因为噪音在最后一步的时候为0，所以使用一个nonzero_mask矩阵来判断
 
-```Python
-# denoise_step: sample x_{t-1} from x_t and pred_noise
-@torch.no_grad()
-def p_sample(self, model, x_t, t, clip_denoised=True):
-    # predict mean and variance
-    model_mean, _, model_log_variance = self.p_mean_variance(model, x_t, t,
-                                                clip_denoised=clip_denoised)
-    noise = torch.randn_like(x_t)
-    # no noise when t == 0
-    nonzero_mask = ((t != 0).float().view(-1, *([1] * (len(x_t.shape) - 1))))
-    # compute x_{t-1}
-    pred_img = model_mean + nonzero_mask * (0.5 * model_log_variance).exp() * noise
-    return pred_img
-```
+  ```python
+  # denoise_step: sample x_{t-1} from x_t and pred_noise
+  @torch.no_grad()
+  def p_sample(self, model, x_t, t, clip_denoised=True):
+      # predict mean and variance
+      model_mean, _, model_log_variance = self.p_mean_variance(model, x_t, t,
+                                                  clip_denoised=clip_denoised)
+      noise = torch.randn_like(x_t)
+      # no noise when t == 0
+      nonzero_mask = ((t != 0).float().view(-1, *([1] * (len(x_t.shape) - 1))))
+      # compute x_{t-1}
+      pred_img = model_mean + nonzero_mask * (0.5 * model_log_variance).exp() * noise
+      return pred_img
+  ```
+
+  
 
 - “计算 $p(x_{t-1}|x_t)$的均值和方差”步骤
 
-推理算法中给出的公式如下，实际实现时采用的公式是未将 $x_0$替换的版本，并且对 $x_0$做了clip操作（将 $x_0$中的元素限制在-1和1之间），使用的是对数方差再取指数e（对数方差限制最小值为0）：
+  推理算法中给出的公式如下，实际实现时采用的公式是未将 $x_0$替换的版本，并且对 $x_0$做了clip操作（将 $x_0$中的元素限制在-1和1之间），使用的是对数方差再取指数e（对数方差限制最小值为0）：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/9.png" alt="img" style="zoom:67%;" />
+  <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/9.png" alt="img" style="zoom:67%;" />
 
-```Python
-model_mean, _, model_log_variance = self.p_mean_variance(model,x_t,t,
-                                                     clip_denoised=clip_denoised)
- 
-#self.p_mean_variance函数
-# compute predicted mean and variance of p(x_{t-1} | x_t)
-def p_mean_variance(self, model, x_t, t, clip_denoised=True):
-    # predict noise using model
-    pred_noise = model(x_t, t)
-    # get the predicted x_0
-    x_recon = self.predict_start_from_noise(x_t, t, pred_noise)
+  ```python
+  model_mean, _, model_log_variance = self.p_mean_variance(model,x_t,t,
+                                                       clip_denoised=clip_denoised)
+   
+  #self.p_mean_variance函数
+  # compute predicted mean and variance of p(x_{t-1} | x_t)
+  def p_mean_variance(self, model, x_t, t, clip_denoised=True):
+      # predict noise using model
+      pred_noise = model(x_t, t)
+      # get the predicted x_0
+      x_recon = self.predict_start_from_noise(x_t, t, pred_noise)
+  
+      if clip_denoised:
+          x_recon = torch.clamp(x_recon, min=-1., max=1.)
+      model_mean, posterior_variance, posterior_log_variance = \
+                  self.q_posterior_mean_variance(x_recon, x_t, t)
+      return model_mean, posterior_variance, posterior_log_variance
+      
+  # Compute the mean and variance of the diffusion posterior: q(x_{t-1} | x_t, x_0)
+  def q_posterior_mean_variance(self, x_start, x_t, t):
+      posterior_mean = (
+          self._extract(self.posterior_mean_coef1, t, x_t.shape) * x_start
+          + self._extract(self.posterior_mean_coef2, t, x_t.shape) * x_t
+      )
+      posterior_variance = self._extract(self.posterior_variance, t, x_t.shape)
+      posterior_log_variance_clipped = self._extract(self.posterior_log_variance_clipped, t, x_t.shape)
+      return posterior_mean, posterior_variance, posterior_log_variance_clipped
+      
+  self.posterior_mean_coef1 = (
+      self.betas * torch.sqrt(self.alphas_cumprod_prev) / (1.0 - self.alphas_cumprod)
+  )
+  self.posterior_mean_coef2 = (
+      (1.0-self.alphas_cumprod_prev)*torch.sqrt(self.alphas)/(1.0-self.alphas_cumprod)
+  )
+  
+  # calculations for posterior q(x_{t-1} | x_t, x_0)
+  self.posterior_variance = (
+      self.betas * (1.0 - self.alphas_cumprod_prev) / (1.0 - self.alphas_cumprod)
+  )
+  # below: log calculation clipped because the posterior variance is 0 at the beginning
+  # of the diffusion chain
+  self.posterior_log_variance_clipped = torch.log(self.posterior_variance.clamp(min =1e-20))
+  ```
 
-    if clip_denoised:
-        x_recon = torch.clamp(x_recon, min=-1., max=1.)
-    model_mean, posterior_variance, posterior_log_variance = \
-                self.q_posterior_mean_variance(x_recon, x_t, t)
-    return model_mean, posterior_variance, posterior_log_variance
-    
-# Compute the mean and variance of the diffusion posterior: q(x_{t-1} | x_t, x_0)
-def q_posterior_mean_variance(self, x_start, x_t, t):
-    posterior_mean = (
-        self._extract(self.posterior_mean_coef1, t, x_t.shape) * x_start
-        + self._extract(self.posterior_mean_coef2, t, x_t.shape) * x_t
-    )
-    posterior_variance = self._extract(self.posterior_variance, t, x_t.shape)
-    posterior_log_variance_clipped = self._extract(self.posterior_log_variance_clipped, t, x_t.shape)
-    return posterior_mean, posterior_variance, posterior_log_variance_clipped
-    
-self.posterior_mean_coef1 = (
-    self.betas * torch.sqrt(self.alphas_cumprod_prev) / (1.0 - self.alphas_cumprod)
-)
-self.posterior_mean_coef2 = (
-    (1.0-self.alphas_cumprod_prev)*torch.sqrt(self.alphas)/(1.0-self.alphas_cumprod)
-)
-
-# calculations for posterior q(x_{t-1} | x_t, x_0)
-self.posterior_variance = (
-    self.betas * (1.0 - self.alphas_cumprod_prev) / (1.0 - self.alphas_cumprod)
-)
-# below: log calculation clipped because the posterior variance is 0 at the beginning
-# of the diffusion chain
-self.posterior_log_variance_clipped = torch.log(self.posterior_variance.clamp(min =1e-20))
-```
-
-可视化结果：
+#### 可视化结果
 
 - 生成结果
 
@@ -443,9 +447,11 @@ self.posterior_log_variance_clipped = torch.log(self.posterior_variance.clamp(mi
 
 - 使用重参数化公式 $x_t =\sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$一步计算得到 $x_0$的结果
 
-> https://www.zhihu.com/question/583158958
+  > https://www.zhihu.com/question/583158958
 
-可以看出，直接一步计算得到 $x_0$的结果是不行的。正向是一个加噪的过程，可以粗糙一点；但是逆向过程是一个复原图像的过程，需要更精细，否则误差会非常大。
+  可以看出，直接一步计算得到 $x_0$的结果是不行的。正向是一个加噪的过程，可以粗糙一点；但是逆向过程是一个复原图像的过程，需要更精细，否则误差会非常大。
+
+
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/8.png" alt="img" style="zoom: 25%;" />
 
@@ -507,7 +513,7 @@ DDIM（denoising diffusion implicit models)和DDPM有相同的训练目标，但
 - 训练过程和ddpm一致
 - 测试过程函数：
 
-1. 因为ddim可以隔很多步进行采样，所以时间序列不再是[499,498,497,496]，而是类似[476,451,426,376,...]的间隔序列，可以采用均匀采样的方式采样间隔的时间步：
+（1）因为ddim可以隔很多步进行采样，所以时间序列不再是[499,498,497,496]，而是类似[476,451,426,376,...]的间隔序列，可以采用均匀采样的方式采样间隔的时间步：
 
 ```Python
   # make ddim timestep sequence
@@ -527,14 +533,14 @@ ddim_timestep_seq = ddim_timestep_seq + 1
 ddim_timestep_prev_seq = np.append(np.array([0]), ddim_timestep_seq[:-1])
 ```
 
-2. 采样噪声图
+（2）采样噪声图
 
 ```Python
  # start from pure noise (for each example in the batch)
  sample_img = torch.randn((batch_size, channels, image_size, image_size), device=device)
 ```
 
-3. 开始迭代还原图像，根据公式 $x_{t-1} = \sqrt{\bar\alpha_{t-1}}(\frac{x_t-\sqrt{1-\bar\alpha_t}\epsilon_\theta(x_t)}{\sqrt{\bar\alpha_t}})+\sqrt{1-\bar\alpha_{t-1}-\sigma^2}\epsilon_\theta(x_t)+\sigma\epsilon$，其中方差的公式采用 $\sigma = \eta\sqrt{\frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t}}\sqrt{1-\frac{\bar\alpha_t}{\bar\alpha_{t-1}}}$
+（3）开始迭代还原图像，根据公式 $x_{t-1} = \sqrt{\bar\alpha_{t-1}}(\frac{x_t-\sqrt{1-\bar\alpha_t}\epsilon_\theta(x_t)}{\sqrt{\bar\alpha_t}})+\sqrt{1-\bar\alpha_{t-1}-\sigma^2}\epsilon_\theta(x_t)+\sigma\epsilon$，其中方差的公式采用 $\sigma = \eta\sqrt{\frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t}}\sqrt{1-\frac{\bar\alpha_t}{\bar\alpha_{t-1}}}$
 
 ```Python
 sample_img = torch.randn((batch_size, channels, image_size, image_size), device=device)
@@ -570,7 +576,7 @@ for i in tqdm(reversed(range(0, ddim_timesteps)), desc='sampling loop time step'
 
 - 20步，ddim_eta=0时的生成效果：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/12.png" alt="img" style="zoom:50%;" />
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/12.png" alt="img" style="zoom: 33%;" />
 
 ### 特性
 

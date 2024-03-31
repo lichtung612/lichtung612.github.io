@@ -157,7 +157,7 @@ cosine schedule的alpha值随着时间步缓慢改变，防止突变：
 
 ### 重要性采样
 
-IDDPM期望直接通过优化 $L_{vlb}$来完成最好的log-likelihoods，而不是直接优化 $L_{hybrid}$。然而，作者发现直接优化 $L_{vlb}$是困难的。
+IDDPM期望直接通过优化 $L_{vlb}$来完成最好的log-likelihoods，而不是直接优化 $L_{hybrid}$。然而作者发现直接优化 $L_{vlb}$是困难的。
 
 作者假设 $L_{vlb}$的梯度中噪声比$L_{hybrid}$更多。图2可以看出，不同的扩散步骤中噪声是不同的。假设均匀采样时间步t造成 $L_{vlb}$优化过程中不必要的噪声。于是提出importance sampling：
 
@@ -179,8 +179,6 @@ $L_{hybrid}$模型可以减少很多扩散步数，同时产生高质量样本�
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/16.jpg" alt="img" style="zoom:67%;" />
 
-实践中，DDPM和IDDPM使用1和T之间的K个等距实数得到具有K个时间步值的序列。评估结果如下：
-
-可以看出对于IDDPM来说，t=100就可以得到不错的FID分数。对于DDIM，发现DDIM可以在采样步数小于50时得到更好的结果，但是当使用更多的步数，DDIM效果不如IDDPM。
+实践中，DDPM和IDDPM使用1和T之间的K个等距实数得到具有K个时间步值的序列。评估结果如下图所示，可以看出对于IDDPM来说，t=100就可以得到不错的FID分数。对于DDIM，发现DDIM可以在采样步数小于50时得到更好的结果，但是当使用更多的步数，DDIM效果不如IDDPM。
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/17.jpg" alt="img" style="zoom:67%;" />

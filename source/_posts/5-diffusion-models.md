@@ -45,7 +45,7 @@ tag:
 >
 >  $weights = weights + \alpha*grad$
 >
->  $EMA\_weights = EMA\_weights*decay + (1-decay)*Weights$
+>  $EMA\\_ weights = EMA\\_ weights*decay + (1-decay)*weights$
 >
 > ```Python
 >  def ema(source,target,decay):
