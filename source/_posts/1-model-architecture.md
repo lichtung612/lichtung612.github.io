@@ -140,7 +140,7 @@ Mobilenet V3 block: Inverted residual + Squeeze-and-Excite
 >
 > https://arxiv.org/pdf/2111.11418.pdf
 
-观点：Transformer的有效性主要来自它们通用的token mixer和channel mixer结构，即MetaFormer架构。其性能与特定的token mixer如attention mixer关系不大。
+观点：ViTs的有效性主要来自它们通用的token mixer和channel mixer结构，即MetaFormer架构。其性能与特定的token mixer如attention mixer关系不大。
 
 ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/12.jpg)
 
