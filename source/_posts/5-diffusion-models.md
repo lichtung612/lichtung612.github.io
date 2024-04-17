@@ -176,7 +176,7 @@ def get_params(img: Tensor, output_size: Tuple[int, int]) -> Tuple[int, int, int
     return i, j, th, tw
 ```
 
-包括下面的多尺度微调，**SDXL一共添加4个额外的条件注入UNet：pooled text embedding、original size、crop top-left coord、target size**。对于后面三个条件，它们可以像timestep一样采用傅立叶编码得到特征，然后这些特征和pooled text embedding拼接在一起，最终得到维度为2816（1280+256*2*3）的特征。我们将这个特征采用两个线性层映射到和time embedding一样的维度，然后加在time embedding上即可。代码如下：
+包括下面的多尺度微调，**SDXL一共添加4个额外的条件注入UNet：pooled text embedding、original size、crop top-left coord、target size**。对于后面三个条件，它们可以像timestep一样采用傅立叶编码得到特征，然后这些特征和pooled text embedding拼接在一起，最终得到维度为2816（$1280+256\times2\times3$）的特征。我们将这个特征采用两个线性层映射到和time embedding一样的维度，然后加在time embedding上即可。代码如下：
 
 ```Python
 import math

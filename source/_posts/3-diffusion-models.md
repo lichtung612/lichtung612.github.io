@@ -49,7 +49,7 @@ tag:
      
      #classifier guidance步骤
      classifier_guidance = classifier_model.get_class_guidance(input,y)
-     input += class_guidance * guidance_scale #把梯度加上去
+     input += classifier_guidance * guidance_scale #把梯度加上去
 ```
 
 在推理过程，从 $x_t$得到 $x_{t-1}$后，将 $x_{t-1}$作为输入图片、 $y$作为标签送入分类模型，计算分类loss得到 $x_{t-1}$的梯度（正常的分类模型的参数是网络连接层的权重参数，这里面输入图像本身也是可学习的参数，并且对我们有用的就是输入图像本身的梯度），把梯度乘以guidance_scale系数，添加到 $x_{t-1}$上，得到更新后的图像。

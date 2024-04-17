@@ -107,7 +107,7 @@ DDPM中，网络可以通过预测 $x_0$来拟合均值，也可以通过预测�
 
 <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/6.jpg" alt="img" style="zoom:67%;" />
 
-可以发现 $L_{simple}$**并没有学习方差**，仅仅学习均值。DDPM实验发现，当方差设置为 $\sigma_t^2=\beta_t$**或者** $\sigma_t^2=\widetilde\beta_t$**时，样本生成质量差不多一致（** $\beta_t$**和** $\widetilde\beta_t$**分别是方差的上届和下届）**。
+可以发现 $L_{simple}$**并没有学习方差**，仅仅学习均值。DDPM实验发现，当方差设置为 $\sigma_t^2=\beta_t$**或者** $\sigma_t^2=\widetilde\beta_t$**时，样本生成质量差不多一致（** $\beta_t$**和** $\widetilde\beta_t$**分别是方差的上界和下界）**。
 
 ## IDDPM
 

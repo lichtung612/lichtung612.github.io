@@ -21,7 +21,7 @@ tag:
 
 1. 一种高效微调text-to-image diffusion models的方法，可以让diffusion model学习空间条件注入信息。
 2. ControlNet冻结stable diffusion的参数，复用它的encoding layers来训练，其中复用的encoding layers的参数为零初始化（"zero convolutions", zero-initialized convolution layers)，确保没有有害的噪声影响微调。
-3. 在输入粗糙的边缘、pose、深度、草图、语义图、深度等条件下都可以得到满意的效果。
+3. 在输入粗糙的边缘、pose、深度、草图、语义图等条件下都可以得到满意的效果。
 
 ## 方法
 
@@ -149,7 +149,7 @@ CFG(Classifier-Free Guidance)公式表示为 $\epsilon_{prd} = \epsilon_{uc}+\be
         # add 0 to the unconditional batch to keep it unchanged.
         down_block_res_samples = [torch.cat([torch.zeros_like(d), d]) for d in down_block_res_samples]
         mid_block_res_sample = torch.cat([torch.zeros_like(mid_block_res_sample), mid_block_res_sample])
-    ```
+   ```
 - perform guidance
 
     ```Python
