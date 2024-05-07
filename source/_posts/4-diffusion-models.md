@@ -75,7 +75,7 @@ Imagen探索了几种预训练的text encoders：BERT、T5、CLIP。冻结这些
 
 使用带有**噪声条件增强**的级联扩散模型对于生成高质量图像是有效的。
 
-给定一个低分辨率图像和增强水平（aug_level），使用此增强来破坏低分辨率图像，在破坏后的图像上进行diffusion。训练过程中,aug_level被随机选择；推理过程中，使用不同aug_level值进行生成，找到最佳的样本。Imagen使用高斯噪声作为增强，$aug\_level \in [0,1]$。
+给定一个低分辨率图像和增强水平（aug_level），使用此增强来破坏低分辨率图像，在破坏后的图像上进行diffusion。训练过程中,aug_level被随机选择；推理过程中，使用不同aug_level值进行生成，找到最佳的样本。Imagen使用高斯噪声作为增强，$aug\\_level \in [0,1]$。
 
 ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/6.jpg)
 
