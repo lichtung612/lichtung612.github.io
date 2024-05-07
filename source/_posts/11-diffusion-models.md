@@ -6,7 +6,7 @@ cover: false
 category:
  - Diffusion model
 tag:
- - LoRA
+ - PEFT
 ---
 
 > LoRA学习笔记
