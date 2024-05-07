@@ -1,89 +1,91 @@
 ---
-title: 扩散模型（八）| Transformer-based Diffusion：U-ViT
-date: 2024-01-30
+title: 扩散模型（八）| 3D Diffusion：PointE
+date: 2024-01-24
 mathjax: true
 cover: false
 category:
  - Diffusion model
-tag:
- - Transformer-based diffusion
 ---
 
->  《All are Worth Words: A ViT Backbone for Diffusion Models》-23CVPR- https://arxiv.org/pdf/2209.12152.pdf
+> PointE: A system for Generating 3D Point Clouds from Complex Prompts
 >
-> 代码：https://github.com/baofff/U-ViT
+> https://arxiv.org/pdf/2212.08751.pdf
+>
+> https://github.com/openai/point-e
 
-## 总体介绍
+## Abstract
 
-***背景：***ViT在各种视觉任务中取得优异效果，而基于CNN的U-Net模型依然在扩散模型中占据主体地位。一个很自然的问题：在扩散模型中，ViT能否代替基于CNN的U-Net？ 
+最近的text-conditional 3D生成模型经常需要多个GPU-hours来生成一个单一样本，这和图像生成模型（几秒或几分钟就可以生成样本）相比有巨大的差距。本文提出一个3D生成模型PointE（generate Point clouds Efficiently)，可以用单个GPU在1-2分钟内生成3D模型。
 
-***模型架构：***在本论文中，我们设计了一个简单通用的**基于ViT架构的**图像生成扩散模型U-ViT：
+该方法首先用一个text-to-image diffusion模型生成一个单一的合成视角的图像，之后用另一个输入条件为图像的diffusion模型生成3D点云。
 
-- 把包括时间、条件、噪声所有的输入视为tokens
-- 在浅层和深层之间应用长距离跳跃连接（因为图像生成是一个pixel-level预测任务，对低层级特征敏感。长跳跃连接提供低层次的特征，使模型更容易训练）
-- 在输出前添加3x3卷积块，以获得更好的视觉质量
+该方法虽然质量上和sota模型有差距，但是速度比其他的快1-2个数量级。
 
-***实验：***我们在无条件图像生成、类别条件图像生成和text-to-image生成三种类型任务上评估U-ViT，实验结果表明：
+## Introduction
 
-- U-ViT即使不优于类似大小的基于CNN的U-Net,也具有可比性。特别地，在不访问大型外部数据集的方法中，U-ViT在ImageNet 256x256 class-conditional生成任务中取得破纪录的FID 2.29分，MS-COCO text-to-image生成任务中取得5.48分。
-- 对于扩散模型图像建模，长距离跳跃连接是至关重要的，而基于CNN的U-Net中上采样和下采样操作不是必要的。
+最近的text-to-3D方法大致分成2类：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/0.jpg" alt="img" style="zoom:50%;" />
+- 使用成对的数据（text，3D）或者没有标签的3D数据训练生成模型。这些方法利用现有的生成模型方法来高效生成样本，但是它们面对生成多样性和复杂的文本Prompt是困难的，因为目前缺乏大规模3D数据集。
+- 利用预训练的text-image模型来优化3D表示。这些方法可以处理复杂多样的text prompts，但是需要昂贵的优化过程来生成样本。此外，由于缺乏3D先验知识，这些方法容易陷入局部最优，不能生成有意义或连贯的三维对象。
 
-## 模型架构设计
+本文试图结合两种方法的优势，通过将text-to-image模型和image-to-3D模型结合起来。其中，text-to-image模型利用大量的(text,image)语料对，允许模型根据多样复杂的prompt进行生成；image-to-3D模型在一个更小的(image,3D)数据集上训练。为了根据text prompt生成一个3D物体，首先使用text-to-image模型采样一个图像，之后根据这个采样的图像使用image-to-3D模型采样一个3D object。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/1.jpg)
+## Method
 
-如上图所示为不同的设计方案，在进行实验后U-ViT选择了各种方案中FID分数最好的方案，带*号表示U-ViT的选择。
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/0.jpg)
 
-- **Long skip connection:** 对于网络主分支的特征和来自跳跃连接的特征 $h_m,h_s \in R^{L\times D}$，U-ViT选择将它们concat起来，之后执行线性投影，即 $Linear(Concat(h_m,h_s))$。
-- **Feed time into the network：**有2种方案，一种是直接将时间t视为token，一种是类似于adaptive group normalization，在LayerNorm后插入时间t，即 $AdaLN(h,t)=t_sLayerNorm(h)+t_b$，h是transformer block的特征， $t_s,t_b$是 $t$经过线性投影后的特征。实验发现直接将时间t视为token效果更好。
-- **在Transformer后添加额外卷积块：**有3种方案，一种是在线性投影后添加3x3卷积块，一种是线性投影前添加3x3卷积块，一种是不添加卷积块，实验发现在线性投影后添加卷积块效果更好。
-- **Patch embedding：**有2种方案，方案一是采用线性投影来做token embedding，方案二是用一个3x3卷积块+1x1卷积块来做token embedding。实验结果表明方案一更好。
-- **Positional embedding：**有2种方案，方案一是和原始ViT一样，采用一维可学习的位置嵌入，方案二是采用2维正弦位置嵌入（concat像素（i,j）的sinusoidal embeddings）。实验结果表明方案一更好。本文也尝试不使用任何的位置嵌入，发现模型不能生成有意义的图像，可见位置编码在图像生成中的重要性。
+1. 通过一个text caption生成一个合成视角的图像 <- 3-billion参数的在渲染的3D模型数据集上微调的GLIDE模型
+2. 通过合成视角的图像生成一个粗粒度的点云（1024points) <-具有置换不变性的diffusion model
+3. 在低分辨率点云和合成视角图像条件下进行进一步生成，生成一个细粒度的点云（4096points）<-和第二个diffusion模型相似但是更小的扩散模型
 
-## 缩放能力
+### Synthesis GLIDE Model
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/2.jpg)
+为了确保text-to-image模型可以生成正确的合成视角，训练模型让模型可以生成满足点云训练数据集分布的3D渲染。
 
-上图通过缩放深度（层数）、宽度（隐藏层的维度）、patch size探究了U-ViT的缩放能力。
+为此，使用GLIDE初始训练数据集和3D渲染数据集微调GLIDE模型。因为3D渲染数据集相比于GLIDE训练数据集小很多，仅仅只在5%的时间内对3D数据集的图像进行采样，其余95%使用原始数据集。微调100K个迭代，意味着模型已经在整个3D数据集上训练了几个epochs。
 
-- Depth(#layers)：当深度增加到17在第500k迭代时模型性能不再提升
-- Width(hidden size)：宽度从256提高到512，模型性能提升；但是从512提高到768时性能不再提升
-- Patch size: 减小patch size提升了模型性能。一个小的patch size=2拥有很好的表现。作者推测因为噪声预测任务是低层次的，因此需要更小的patches（不同于需要高层次语义特征的分类任务）。因为对高分辨率图像来说采用较小的patch size很消耗资源，所以我们首先将图像转换到低维度潜在空间中，之后用U-ViT建模潜在特征表示。
+在测试时，为了确保我们总是在3D分布渲染中采样，我们在每个3D渲染的文本提示中添加一个特殊的标记，指示它是3D渲染；然后在测试时使用此token进行采样。
 
-## 同等参数量和计算量的效果对比
+### Point Cloud Diffusion
 
-同等参数量和计算量下（U-ViT：501M parameters,133 GFLOPs；U-Net：646M parameters,135 GFLOPs），在classifier-free guidance的情况下U-ViT在不同的训练迭代中始终优于U-Net。
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/1.jpg" alt="img" style="zoom:50%;" />
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/3.jpg)
+将点云表示成一个tensor，shape为K x 6，K是点云中点的数量，特征维度为(x,y,z,R,G,B)。全部坐标和颜色被标准化为[-1,1]。输入随机噪声K x 6，通过diffusion模型逐步denoising，生成点云。
 
-## 实验
+利用简单的Transformer-based模型基于输入图像、时间步t、噪声点云 $x_t$来预测噪声 $\epsilon$和方差 Σ。 
 
-### Unconditional and Class-Conditional Image Generation
+- 条件编码
+  - t：通过一个小的MLP，获得一个D维向量
+  - 噪声点云：每个点通过一个linear层，得到K x D
+  - 图像：使用一个预训练的ViT-L/14 CLIP模型提取特征，选择最后一层的特征嵌入（256 x $D'$），线性投影成256 x D
 
-#### FID得分
+所有条件编码在batch维度concat，构成transformer的输入：(K+257)xD。为了获得长度为K的最终输出序列，我们取输出的最后K个标记并将其投影，以获得K个输入点的ε和∑预测。
 
-从下表可以看出，U-ViT在图像无条件生成以及类别条件生成上取得了和其他模型可比或者更优的FID。
+注意，因为在整个过程中都没有使用位置编码，所以模型满足置换不变性。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/4.jpg)
+### Point Cloud Upsampler
 
-#### 潜在空间建模性能
+upsampler模型采用和base模型相同的架构。对于低分辨率的point cloud采用另外的condition tokens，将条件点云通过一个分离的线性嵌入层，使模型可以区分高分辨率点云和低分辨率点云的信息。
 
-U-ViT在ImageNet256数据集上取得了SOTA的FID，可以发现其在潜在空间性能更好。和用U-Net建模特征空间的[Latent Diffusion](https://link.zhihu.com/?target=https%3A//arxiv.org/abs/2112.10752) 相比，在使用相同采样器（dpm_solver）和相同采样步数的情况下，U-ViT均能取得更优的表现。
+## Results
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/6.jpg)
+### Qualitative Results
 
-### Text-to-Image Generation on MS-COCO
+PointE可以基于复杂的Prompts生成高质量的3D shapes。
 
-#### FID得分
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/2.jpg" alt="img" style="zoom:50%;" />
 
-U-ViT展现了杰出的多模态融合能力，在没有额外数据的情况下，U-ViT取得了MS-COCO数据集上text-to-image generation任务的SOTA FID。
+失败的例子：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/7.jpg)
+1. 错误地理解不同部分的相对比例，导致生成了一个高的狗而非短的长的狗。
+2. 不能推理出被遮挡的部分
 
-#### 图像与文本匹配质量更高
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/3.jpg" alt="img" style="zoom:50%;" />
 
-如下图显示了U-Net和U-ViT使用相同随机种子生成的样本，发现U-ViT生成了更多高质量的样本，同时语义与文本匹配得更好。例如，给定文本“棒球运动员向球挥动球棒”，U-Net既不生成球棒也不生成球。相比之下，U-ViT-S在更少的训练参数下可以生成球，而我们的U-ViT-S（Deep）更近一步把球和球棒都生成出来。我们假设这是因为文本和图像在U-ViT的每一层都有交互，这比只在cross attention层交互的U-Net更频繁。
+### Model Scaling and Ablations
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/8.jpg)
+1. 仅仅使用text conditioning，而没有text-to-image步骤导致模型产生更差的结果
+2. 使用一个单一的token编码图像CLIP embedding比使用多个token编码CLIP embedding产生更差的结果
+3. 扩大模型可以加速收敛，增大CLIP R-Presicion结果。
+
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/4.jpg" alt="img" style="zoom:67%;" />
