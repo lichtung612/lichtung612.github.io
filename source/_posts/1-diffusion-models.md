@@ -1,6 +1,6 @@
 ---
 title: 扩散模型（一）| DDPM & DDIM
-date: 2024-01-03
+date: 2023-12-22
 mathjax: true
 cover: false
 category:

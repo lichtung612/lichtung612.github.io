@@ -1,6 +1,6 @@
 ---
 title: 扩散模型（二）| IDDPM
-date: 2024-01-05
+date: 2023-12-26
 mathjax: true
 cover: false
 category:

@@ -1,6 +1,6 @@
 ---
-title: 扩散模型（十）| Transformer-based Diffusion：DiT
-date: 2024-02-20
+title: 扩散模型（十）| Transformer-based Diffusion：U-ViT
+date: 2024-01-30
 mathjax: true
 cover: false
 category:
@@ -9,129 +9,81 @@ tag:
  - Transformer-based diffusion
 ---
 
->  Scalable Diffusion Models with Transformers-23ICCV oral
+>  《All are Worth Words: A ViT Backbone for Diffusion Models》-23CVPR- https://arxiv.org/pdf/2209.12152.pdf
 >
-> https://arxiv.org/pdf/2212.09748.pdf
->
-> https://github.com/facebookresearch/DiT
->
-> 参考：https://zhuanlan.zhihu.com/p/641013157
+> 代码：https://github.com/baofff/U-ViT
 
-## 概要
+## 总体介绍
 
-- 使用transformer架构代替常用的U-Net架构
-- 更高Gflops的DiT（增加transformer depth/width或者输入token的数量）得到较低的FID，有更好的生成能力。
+***背景：***ViT在各种视觉任务中取得优异效果，而基于CNN的U-Net模型依然在扩散模型中占据主体地位。一个很自然的问题：在扩散模型中，ViT能否代替基于CNN的U-Net？ 
 
-## 方法
+***模型架构：***在本论文中，我们设计了一个简单通用的**基于ViT架构的**图像生成扩散模型U-ViT：
 
-DiT采用**IDDPM**方法（IDDPM解读见https://lichtung612.github.io/posts/2-diffusion-models/ ），同时预测模型的**噪声和方差**。
+- 把包括时间、条件、噪声所有的输入视为tokens
+- 在浅层和深层之间应用长距离跳跃连接（因为图像生成是一个pixel-level预测任务，对低层级特征敏感。长跳跃连接提供低层次的特征，使模型更容易训练）
+- 在输出前添加3x3卷积块，以获得更好的视觉质量
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/9-diffusion-models/0.jpg)
+***实验：***我们在无条件图像生成、类别条件图像生成和text-to-image生成三种类型任务上评估U-ViT，实验结果表明：
 
-### Patchify
+- U-ViT即使不优于类似大小的基于CNN的U-Net,也具有可比性。特别地，在不访问大型外部数据集的方法中，U-ViT在ImageNet 256x256 class-conditional生成任务中取得破纪录的FID 2.29分，MS-COCO text-to-image生成任务中取得5.48分。
+- 对于扩散模型图像建模，长距离跳跃连接是至关重要的，而基于CNN的U-Net中上采样和下采样操作不是必要的。
 
-DiT的输入是一个空间潜在表示 z（对于256x256x3的图像来说，z的shape为32x32x4）。
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/0.jpg" alt="img" style="zoom:50%;" />
 
-输入首先要经过patchify变成包含T个tokens的序列，每个token的维度是d。
+## 模型架构设计
 
-之后使用sine-cosine位置编码来编码输入tokens。
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/1.jpg)
 
-其中，token的数量T由patch size超参数p来决定。token数量增大2倍，至少使总的Gflops增大4倍，但是不会影响下游参数数量。
+如上图所示为不同的设计方案，在进行实验后U-ViT选择了各种方案中FID分数最好的方案，带*号表示U-ViT的选择。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/9-diffusion-models/1.jpg" alt="img" style="zoom:50%;" />
+- **Long skip connection:** 对于网络主分支的特征和来自跳跃连接的特征 $h_m,h_s \in R^{L\times D}$，U-ViT选择将它们concat起来，之后执行线性投影，即 $Linear(Concat(h_m,h_s))$。
+- **Feed time into the network：**有2种方案，一种是直接将时间t视为token，一种是类似于adaptive group normalization，在LayerNorm后插入时间t，即 $AdaLN(h,t)=t_sLayerNorm(h)+t_b$，h是transformer block的特征， $t_s,t_b$是 $t$经过线性投影后的特征。实验发现直接将时间t视为token效果更好。
+- **在Transformer后添加额外卷积块：**有3种方案，一种是在线性投影后添加3x3卷积块，一种是线性投影前添加3x3卷积块，一种是不添加卷积块，实验发现在线性投影后添加卷积块效果更好。
+- **Patch embedding：**有2种方案，方案一是采用线性投影来做token embedding，方案二是用一个3x3卷积块+1x1卷积块来做token embedding。实验结果表明方案一更好。
+- **Positional embedding：**有2种方案，方案一是和原始ViT一样，采用一维可学习的位置嵌入，方案二是采用2维正弦位置嵌入（concat像素（i,j）的sinusoidal embeddings）。实验结果表明方案一更好。本文也尝试不使用任何的位置嵌入，发现模型不能生成有意义的图像，可见位置编码在图像生成中的重要性。
 
-### DiT block design
+## 缩放能力
 
-以类别条件和时间条件为例，探究4种向transformer blocks中注入条件的方式：
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/2.jpg)
 
-- In-context conditioning：简单的将时间t和class label c当作2个额外的tokens，对待它们与图像token没有区别。
-- Cross-attention block：将t和c的嵌入concat成一个长度为2的序列，通过一个额外的多头cross-attention层注入，latent为query，条件embeddings作为key和value。这种方式会额外引入较大的计算量。
-- Adaptive layer norm (adaLN) block：将transformer blocks里的标准Layer norm层替换成adaptive layer norm，回归shift和scale参数。这种方式基本不增加计算量。
-- adaLN-Zero block：将adaLN的linear层参数初始化为0（在ResNets上的研究表明对每个残差块零初始化，相当于一个identity函数，对于训练网络是有利的）。同时，除了回归scale和shift，还在每个残差块结束前添加一个gate参数。
+上图通过缩放深度（层数）、宽度（隐藏层的维度）、patch size探究了U-ViT的缩放能力。
 
-实验发现，adaLN-Zero方法效果最好。【“虽然DiT发现adaLN-Zero效果最好，但这种方式可能只适合只有类别信息的简单条件嵌入，因为只需要引入一个class embedding；对于文生图来说，其条件往往是序列的text embeddings，采用cross-attention方案可能更合适”】
+- Depth(#layers)：当深度增加到17在第500k迭代时模型性能不再提升
+- Width(hidden size)：宽度从256提高到512，模型性能提升；但是从512提高到768时性能不再提升
+- Patch size: 减小patch size提升了模型性能。一个小的patch size=2拥有很好的表现。作者推测因为噪声预测任务是低层次的，因此需要更小的patches（不同于需要高层次语义特征的分类任务）。因为对高分辨率图像来说采用较小的patch size很消耗资源，所以我们首先将图像转换到低维度潜在空间中，之后用U-ViT建模潜在特征表示。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/9-diffusion-models/2.jpg" alt="img" style="zoom:67%;" />
+## 同等参数量和计算量的效果对比
 
->  https://github.com/facebookresearch/DiT/blob/main/models.py#L101
+同等参数量和计算量下（U-ViT：501M parameters,133 GFLOPs；U-Net：646M parameters,135 GFLOPs），在classifier-free guidance的情况下U-ViT在不同的训练迭代中始终优于U-Net。
 
-```python
-class DiTBlock(nn.Module):
-    """
-    A DiT block with adaptive layer norm zero (adaLN-Zero) conditioning.
-    """
-    def __init__(self, hidden_size, num_heads, mlp_ratio=4.0, **block_kwargs):
-        super().__init__()
-        self.norm1 = nn.LayerNorm(hidden_size, elementwise_affine=False, eps=1e-6)
-        self.attn = Attention(hidden_size, num_heads=num_heads, qkv_bias=True, **block_kwargs)
-        self.norm2 = nn.LayerNorm(hidden_size, elementwise_affine=False, eps=1e-6)
-        mlp_hidden_dim = int(hidden_size * mlp_ratio)
-        approx_gelu = lambda: nn.GELU(approximate="tanh")
-        self.mlp = Mlp(in_features=hidden_size, hidden_features=mlp_hidden_dim, act_layer=approx_gelu, drop=0)
-        self.adaLN_modulation = nn.Sequential(
-            nn.SiLU(),
-            nn.Linear(hidden_size, 6 * hidden_size, bias=True)
-        )
-
-        # zero init
-        nn.init.constant_(self.adaLN_modulation[-1].weight, 0)
-        nn.init.constant_(self.adaLN_modulation[-1].bias, 0)
-
-    def forward(self, x, c):
-        shift_msa, scale_msa, gate_msa, shift_mlp, scale_mlp, gate_mlp = self.adaLN_modulation(c).chunk(6, dim=1)
-        x = x + gate_msa.unsqueeze(1) * self.attn(modulate(self.norm1(x), shift_msa, scale_msa))
-        x = x + gate_mlp.unsqueeze(1) * self.mlp(modulate(self.norm2(x), shift_mlp, scale_mlp))
-        return x
-        
-        
- def modulate(x, shift, scale):
-     return x * (1+scale.unsqueeze(1)) + shift.unsqueeze(1)
-```
-
-
-
-### Transformer decoder
-
-由于对输入进行token化，需要在网络的最后添加一个decoder来恢复原始输入维度。需要预测噪声和方差系数两项，它们都和原始空间输入维度相同。使用一个包含linear层和adaLN-Zero层的decoder来实现(linear层也采用zero初始化），输出为 $p \times p \times 2C$，输出特征维度是之前的2倍，分别对应噪声和方差系数。
-
-> https://github.com/facebookresearch/DiT/blob/main/models.py#L125
-
-```python
- class FinalLayer(nn.Module):
-    def __init__(self, hidden_size, patch_size, out_channels):
-        super().__init__()
-        self.norm_final = nn.LayerNorm(hidden_size, elementwise_affine=False, eps=1e-6)
-        self.linear = nn.Linear(hidden_size, patch_size * patch_size * out_channels, bias=True)
-        self.adaLN_modulation = nn.Sequential(
-            nn.SiLU(),
-            nn.Linear(hidden_size, 2 * hidden_size, bias=True)
-        )
-
-        #zero-out output layers:
-        nn.init.constant_(self.adaLN_modulation[-1].weight, 0)
-        nn.init.constant_(self.adaLN_modulation[-1].bias, 0)
-        nn.init.constant_(self.linear.weight, 0)
-        nn.init.constant_(self.linear.bias, 0)
-
-    def forward(self, x, c):
-        shift, scale = self.adaLN_modulation(c).chunk(2, dim=1)
-        x = modulate(self.norm_final(x), shift, scale)
-        x = self.linear(x)
-        return x
-```
-
-
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/3.jpg)
 
 ## 实验
 
-设计了4种大小的模型：
+### Unconditional and Class-Conditional Image Generation
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/9-diffusion-models/3.jpg" alt="img" style="zoom:67%;" />
+#### FID得分
 
-探究模型的缩放能力，发现模型计算量对生成效果至关重要，计算量越大，生成质量越高：
+从下表可以看出，U-ViT在图像无条件生成以及类别条件生成上取得了和其他模型可比或者更优的FID。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/9-diffusion-models/4.jpg" alt="img" style="zoom:67%;" />
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/4.jpg)
 
-性能上，最大的模型在classifier free guidance下可以达到sota：
+#### 潜在空间建模性能
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/9-diffusion-models/5.jpg" alt="img" style="zoom:80%;" />
+U-ViT在ImageNet256数据集上取得了SOTA的FID，可以发现其在潜在空间性能更好。和用U-Net建模特征空间的[Latent Diffusion](https://link.zhihu.com/?target=https%3A//arxiv.org/abs/2112.10752) 相比，在使用相同采样器（dpm_solver）和相同采样步数的情况下，U-ViT均能取得更优的表现。
+
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/6.jpg)
+
+### Text-to-Image Generation on MS-COCO
+
+#### FID得分
+
+U-ViT展现了杰出的多模态融合能力，在没有额外数据的情况下，U-ViT取得了MS-COCO数据集上text-to-image generation任务的SOTA FID。
+
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/7.jpg)
+
+#### 图像与文本匹配质量更高
+
+如下图显示了U-Net和U-ViT使用相同随机种子生成的样本，发现U-ViT生成了更多高质量的样本，同时语义与文本匹配得更好。例如，给定文本“棒球运动员向球挥动球棒”，U-Net既不生成球棒也不生成球。相比之下，U-ViT-S在更少的训练参数下可以生成球，而我们的U-ViT-S（Deep）更近一步把球和球棒都生成出来。我们假设这是因为文本和图像在U-ViT的每一层都有交互，这比只在cross attention层交互的U-Net更频繁。
+
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/8.jpg)

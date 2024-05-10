@@ -1,123 +1,145 @@
 ---
-title: 扩散模型（四）| Imagen
-date: 2024-01-11
+title: 扩散模型（四）| DALL-E2(unCLIP)
+date: 2024-01-09
 mathjax: true
 cover: false
 category:
  - Diffusion model
 tag:
- - Imagen
+ - DALLE
 ---
 
-> Photorealistic Text-to-Image Diffusion Models with Deep Language Understanding 
+>  OpenAI - Hierarchical Text-Conditional Image Generation with CLIP Latents
 >
-> Google-https://arxiv.org/pdf/2205.11487
+> 论文：https://arxiv.org/pdf/2204.06125
 >
-> 参考：https://www.zhangzhenhu.com/aigc/imagen.html#
+> 参考：
+>
+> 1. https://blog.csdn.net/xiqiao_ce/article/details/132769442
+> 2. https://www.bilibili.com/video/BV17r4y1u77B/?spm_id_from=333.999.0.0&vd_source=f16d47823aea3a6e77eec228119ddc27
+> 3. https://zhuanlan.zhihu.com/p/394467135
+> 4. https://zhuanlan.zhihu.com/p/648389187
 
-## 创新
+## 文生图模型时间线
 
-（1）在text-only语料数据上训练的大语言模型（如T5）对text-to-image生成有非常重要的影响，增大大语言模型的size比增大图像diffusion模型更能提高生成样本质量。
+上面是闭源相关，下面是开源相关模型。
 
-（2）引入动态阈值，可以让diffusion模型利用更高的guidance权重生成更现实主义和细节的图像。
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/0.jpg)
 
-（3）提出Efficient U-Net架构，使模型更简洁、收敛更快、显存占用更小。
+## 历史生成式方法
 
-## 概览
+### GAN
 
-Imagen，一个text-to-image diffusion模型，同时结合大语言模型和扩散模型的优势。
+GAN包含生成器(Generator)和判别器(Discriminator)。
 
-Imagen架构如下图所示：使用一个frozen text encoder（T5-XXL）来将输入文本编码成text embeddings。一个条件扩散模型将text embedding生成64x64图片，之后利用超分模型上采样图像，从64x64->256x256，之后256x256->1024x1024。全部的diffusion模型都以文本嵌入序列为条件，使用classifier-free guidance。Imagen依靠新的采样技术（dynamic thresholding），在不降低样本质量的情况下使用大的指导权重，生成图像质量更好。
+生成器根据随机噪音z生成图片x'；生成图片x'和真实图片x被送入判别器中，判别是真图片还是假图片。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/0.jpg" alt="img" style="zoom:80%;" />
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/1.jpg)
 
-## 方法
+训练的时候先固定生成器，只训练判别器，此过程只更新判别器参数，不更新生成器参数；之后训练生成器，此过程只更新生成器参数，不更新判别器参数。训练过程二者相互对抗，交替训练。
 
-### Pretrained text encoders
+GAN模型优势：
 
-当前的text-to-image模型中的文本编码器经常在成对的image-text数据上训练（如CLIP）。大语言模型是Text encoder的另一种选择（如BERT、GPT、T5）。大语言模型在大量的纯Text语料上训练，相比成对的image-text数据，其能接触到更丰富和广泛分布的文本（生成文字的效果更好，对文字感知能力更强）。
+（1）生成图像的保真度高；
 
-Imagen探索了几种预训练的text encoders：BERT、T5、CLIP。冻结这些text encoders的权重进行训练。实验发现：
+（2）推理时间快
 
-（1）缩放text encoder size可以提升text-to-image生成质量（图5(a)中T5模型越大，FID越低，CLIP分数越高）。
+GAN模型缺点：
 
-（2）当T5-XXL和CLIP在简单的benchmark如MS-COCO上的FID和CLIP评价指标相似时，人类的评估通常更偏向T5-XXL（图5(a)中CLIP和T5-XXL的分数类似，但是图5（b）中可以看出T5-XXL在文本图像对齐和图像保真度方面分数都比CLIP要高）。
+（1）因为同时要训练2个网络，训练不平衡，容易训练坍塌；
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/1.jpg)
+（2）因为对图像真实度要求高，反而生成图像的多样性、创造性差；
 
-（3）缩放text encoder size比缩放U-Net size更重要。如下图所示，缩放text encoder比缩放U-Net的FID分数变化更明显。
+（3）数学理论上不够好，黑盒模型。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/2.jpg)
+### VAE
 
-### Large guidance weight samplers
+- Autoencoder
 
-增加classifier-free guidance权重提升了image-text对齐效果，但是破坏了图像保真度，容易产生高度饱和和不自然的图像。这是由于高CFG权重导致的train-text mismatch。
+  输入x，经过encoder得到特征z，z的特征维度一般很小，z经过decoder得到图像x'。训练目标希望x'尽可能和x接近。因为是自己重建自己的过程，所以是自编码器。
 
-在每个采样步t，预测出的图像 $\hat x_0^t$必须和训练数据 $x$在相同范围内，如[-1,1]，然而经验性的高的guidance weights造成$\hat x_0^t$超出了这个界限，导致train-test不匹配。由于扩散模型在整个采样过程中反复应用其自身的输出，采样过程会产生不自然的图像。为了解决这个问题，引入static thresholding和dynamic thresholding。
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/2.jpg)
 
-- Static thresholding
+- Denoising autoencoder
 
-  通过裁剪直接将$\hat x_0^t$控制到[-1,1]。这种方法在之前的工作（DDPM）中就有被使用，但是未被重点强调。静态阈值对于具有大引导权重的采样至关重要，并且可以防止生成空白图像。尽管如此，随着引导权重的进一步增加，静态阈值仍然会导致图像过度饱和和细节不足。
+  输入x，首先对x加一定噪声变成 $x_c$（corrupted x），之后把 $x_c$传入encoder得到z，z传入decoder得到x'。训练目标同AE，希望x'尽可能接近x。
 
-- Dynamic thresholding
+  DAE比AE效果好，依据原理是因为图像的像素的冗余性太高，尽管对之前图像做一些污染，仍能重建出原图，并且生成图像的多样性有所提高。
 
-  引入了一种新的动态阈值化方法：在每个采样步骤，将s设置为 $\hat x_0^t$的某个百分位数对应的值，如果s>1，则将所有数阈值化到范围[−s，s]，然后除以s。动态阈值处理将饱和像素（接近-1和1的像素）向内推，从而防止像素在每一步饱和。（比如数据为[1,2,3,4,5]，百分位数为80%，则s为4，数据首先根据阈值4进行裁剪，变为[1,2,3,4,4]，之后除以4，变成[0.24,0.5,0.75,1,1]；如果采用static thresholding，则数据变为[1,1,1,1,1]）
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/3.jpg)
 
-  ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/3.jpg)
+- VAE(Variational Auto-encoder)
 
-  实验发现，当使用非常大的指导权重时，动态阈值可以显著改善照片真实性以及实现更好的图像-文本对齐。
+  无论是AE还是DAE，它们的主要目的都是为了去学习中间的bottleneck特征，把中间的特征拿去做分类、检测、分割等任务，不是用来做生成任务的。因为它学习到的中间的特征不是一个概率分布，没办法对它进行采样。它不像GAN里面的z是一个符合某种分布的随机噪声。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/4.jpg)
+  VAE中间不再是学习一个bottleneck特征了，而是去学习一个分布。假设这个分布是一个高斯分布。当我们得到从编码器出来的特征，在后面加一些FC层，去预测一个均值和方差。得到对应的均值和方差之后，用公式 $z=u+\sigma\epsilon$采样出一个噪声z出来，z经过decoder得到x'。训练好模型后，直接把编码器部分扔掉，随机采样噪声z，就可以生成图像。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/5.jpg)
+  因为VAE学习的是一个概率分布，生成图片的多样性比GAN要好很多，且训练更稳定。
 
-### Robust cascaded diffusion models
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/4.jpg)
 
-使用带有**噪声条件增强**的级联扩散模型对于生成高质量图像是有效的。
+### VQVAE
 
-给定一个低分辨率图像和增强水平（aug_level），使用此增强来破坏低分辨率图像，在破坏后的图像上进行diffusion。训练过程中,aug_level被随机选择；推理过程中，使用不同aug_level值进行生成，找到最佳的样本。Imagen使用高斯噪声作为增强，$aug\\_level \in [0,1]$。
+VQ-VAE中VQ指vector quantised，即把VAE做离散化。现实中大部分信号，比如图像、声音等都是连续的，任务都是回归任务。但是当把它们表示出来，图像变成像素，语音抽样化，效果更好的模型是分类模型，计算机更擅长处理离散的东西。VAE中连续的分布不太好学习，所以VQVAE取而代之，不去做分布的推测，而是使用一个离散的codebook来代替。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/6.jpg)
+codebook可以理解为聚类的中心，大小为KxD。K一般为8192，D为512或者768，即有8192个长度为D的向量，8192个聚类中心。如果有一个图片经过encoder得到一个特征图，把特征图里的向量和codebook里的向量做对比，看它和哪个聚类中心最接近，把最接近的聚类中心的index存到z里，根据z中的index和codebook中的特征生成新的特征图 $f_q$，$f_q$此时不再是随机的东西，它永远来自codebook里的特征。
 
-实验表明，具有noise conditioning augmentation的超分模型产生更好的CLIP和FID得分。在推理阶段向低分辨率图像中添加噪声+使用大的guidance权重允许超分模型生成更多样的上采样结果，同时移除了低分辨率图像中的量化伪影。
+生成目标还是希望生成图像x'和输入图像x一致。
 
-### Neural network architecture
+因为中间特征不是一个分布，而是一个代表前面图像信息的从codebook里面取出的压缩特征，所以VQVAE更适合用于分类、检测、分割任务，而非生成，VQVAE更类似AE，而不是VAE。
 
-- base model
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/5.jpg)
 
-  应用U-Net架构作为base 64x64 text-to-image diffusion model。
+### DALL-E
 
-  Text condition选择cross attention。如下图所示，Mean pooling, attention pooling, cross attention三种条件注入方式中cross attention效果最好。
+DALL-E的输入是text和image。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/7.jpg)
+text首先经过BPE编码，得到256个token（token数不满256的话padding到256）。
 
-- Super-resolution model
+image使用VQVAE,把256x256图像压缩成32x32图片token。(dVAE：discrete VAE，和VQVAE类似一个东西）
 
-  对U-Net模型做了一些改动，使其节省内存、训练收敛更快、推理时间更短，改进后模型为Efficient U-Net。
+256个text token和1024个图像token进行拼接，得到长度为1280的token，将此token送入GPT进行生成训练。
 
-  Efficient U-Net保持text cross-attention层不动，移除了self-attention层。
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/6.jpg)
 
-## Evaluating Text-to-Image Models
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/7.jpg)
 
-- FID：image fidelity
-- CLIP score：image-text alignment
+推理阶段，进行文生图任务时，只输入text，对text编码之后进入GPT解码出image tokens，之后将image tokens通过VQVAE的codebook得到Latent code，再送入VQVAE的decoder解码出原图片。可以生成很多张图片，根据CLIP分数进行筛选。
 
-因为guidance weight对于控制图像质量和text alignment来说是重要的，大部分消融实验的结果使用不同guidance weights下的CLIP和FID曲线来呈现。
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/8.jpg)
 
-- Human evaluation
-  - Image quality：which image is more photorealistic? We report the percentage of times raters choose model generations over reference images (the reference rate)
-  - Alignment: Does the caption accurately describe the above image? Respond with "yes","somewhat","no"
+## 概述
 
-## Experiments
+CLIP模型可以学到很稳健的图像特征，能同时捕获图像的语义和风格信息。DALL-E2又名为unCLIP，因为CLIP是给定文本和图像，生成文本和图像特征；DALL-E2为给定文本特征，得到图像特征，进一步得到图像的过程，类似于CLIP的逆过程。
 
-- Results on COCO
+DALL-E2是一个二阶段模型：prior阶段利用给定的文本描述生成CLIP图像嵌入特征，decoder阶段根据图像嵌入特征+文本特征生成真实图像。（文本->frozen的CLIP文本编码器生成文本特征->prior网络根据文本特征生成图像特征->decoder网络将图像特征解码成图像）。
 
-  Imagen outperforming the concurrent work of DALL-E2 and even models trained on COCO.
+其中，decoder网络采用扩散模型，prior网络实验了扩散模型和自回归模型（如DALLE），最终还是选择了扩散模型，因为扩散模型计算更高效，生成样本质量更高。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/8.jpg)
+下图为DALL-E2流程。文本首先经过CLIP的text encoder得到text embedding，这一步骤无需训练，直接使用frozen的权重。之后text embedding经过prior网络得到image embedding，这一阶段使用CLIP模型中文本图像对的text embedding和img embedding进行监督学习。之后image embedding经过decoder得到图像。
 
-- Results on DrawBench
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/9.jpg)
 
-  Imagen和DALL-E2、GLIDE、Latent Diffusion、CLIP-guided VQ-GAN比较结果：
+实验表明，DALL-E2生成的图像逼真多样（GAN生成的图像保真度好，但不多样）。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/9.jpg)
+## 方法细节
+
+### Prior
+
+Prior也采用扩散模型。因为输入输出是embedding，所以不再使用U-Net预测，而是用decoder-only Transformer预测。扩散模型的输入：the encoded text, the CLIP text embedding, an embedding for the diffusion timestep, the noised CLIP image embedding, a final embedding whose output from the Transformer(类似CLS token）；输出：the unnoised CLIPimage embedding。
+
+与一般工作使用噪声预测不同，DALL-E2训练模型来直接预测embedding $z_i$，使用平方误差损失：
+
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/10.jpg)
+
+### Decoder
+
+- 基于GLIDE模型
+- 根据image embedding和text embedding两个条件进行图像重建
+
+>  图片出处：https://zhuanlan.zhihu.com/p/648389187
+
+![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/11.jpg)
+
+- 采用级联模型，训练2个diffusion upsampler models。第一个模型从64x64->256x256，第二个模型从256->1024。为了提升上采样的鲁棒性，在训练过程中轻度破坏图片，如使用gaussian blur等。
+- 采用classifier-free guidance，训练过程随机以10%的概率将CLIP embeddings设置为0，随机以50%的概率丢弃text capltion。

@@ -1,6 +1,6 @@
 ---
 title: 扩散模型（三）| Classifier Guidance & Classifier-Free Guidance
-date: 2024-01-09
+date: 2024-01-04
 mathjax: true
 cover: false
 category:
@@ -57,6 +57,12 @@ tag:
 ## Classifier-Free Guidance
 
 Classifier guidance只能用分类模型控制生成的类别，生成的类别数有限。classifier-free guidance虽然需要重新训练diffusion模型，但是训好后没有类别数量的限制。
+
+### 训练
+
+训练的时候，只需要以一定的概率把条件丢弃。比如设丢弃概率为10%，则输入90%情况下是有条件的，10%情况下条件为空，这样去训练模型，使模型同时具备有条件生成和无条件生成的能力。
+
+### 推理（sample)
 
 以文生图为例：
 
