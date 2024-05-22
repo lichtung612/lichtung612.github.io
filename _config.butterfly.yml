@@ -235,7 +235,7 @@ aside:
   card_announcement:
     enable: true
     content: |
-      24/03/20: Finding an internship is all you need.<br>
+      24/05/15: Finding an internship is all you need.<br>
       <strike>24/02/02: Sleep is all you need.</strike>
   card_recent_post:
     enable: true
