@@ -1,0 +1,296 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>扩散模型（十五）｜T2I Diffusion Models：Kolors | 披星戴月思想家</title><meta name="author" content="梦游娃娃"><meta name="copyright" content="梦游娃娃"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Kolors: Effective Training of Diffusion Model for Photorealistic Text-to-Image Synthesis https:&#x2F;&#x2F;github.com&#x2F;Kwai-Kolors&#x2F;Kolors&#x2F;blob&#x2F;master&#x2F;imgs&#x2F;Kolors_paper.pdf https:&#x2F;&#x2F;github.com&#x2F;Kwai-Kolors&#x2F;Kolors">
+<meta property="og:type" content="article">
+<meta property="og:title" content="扩散模型（十五）｜T2I Diffusion Models：Kolors">
+<meta property="og:url" content="http://example.com/posts/15-diffusion-models/index.html">
+<meta property="og:site_name" content="披星戴月思想家">
+<meta property="og:description" content="Kolors: Effective Training of Diffusion Model for Photorealistic Text-to-Image Synthesis https:&#x2F;&#x2F;github.com&#x2F;Kwai-Kolors&#x2F;Kolors&#x2F;blob&#x2F;master&#x2F;imgs&#x2F;Kolors_paper.pdf https:&#x2F;&#x2F;github.com&#x2F;Kwai-Kolors&#x2F;Kolors">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/image/avatar.jpg">
+<meta property="article:published_time" content="2024-08-05T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-08-06T14:01:22.750Z">
+<meta property="article:author" content="梦游娃娃">
+<meta property="article:tag" content="T2I Diffusion Models">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/image/avatar.jpg"><link rel="shortcut icon" href="/image/favicon.ico"><link rel="canonical" href="http://example.com/posts/15-diffusion-models/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '扩散模型（十五）｜T2I Diffusion Models：Kolors',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-08-06 22:01:22'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/image/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><hr/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/image/cover.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="披星戴月思想家"><span class="site-name">披星戴月思想家</span></a></span><div id="menus"><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">扩散模型（十五）｜T2I Diffusion Models：Kolors</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-08-05T16:00:00.000Z" title="发表于 2024-08-06 00:00:00">2024-08-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-08-06T14:01:22.750Z" title="更新于 2024-08-06 22:01:22">2024-08-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Diffusion-model/">Diffusion model</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="扩散模型（十五）｜T2I Diffusion Models：Kolors"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><blockquote>
+<p>Kolors: Effective Training of Diffusion Model for Photorealistic Text-to-Image Synthesis</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Kwai-Kolors/Kolors/blob/master/imgs/Kolors_paper.pdf">https://github.com/Kwai-Kolors/Kolors/blob/master/imgs/Kolors_paper.pdf</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Kwai-Kolors/Kolors">https://github.com/Kwai-Kolors/Kolors</a></p>
+</blockquote>
+<p>近期，快手提出Kolors模型，具备强大的中英文理解能力，主打生成写实风格图片。Kolors在backbone架构方面和SDXL相同，直接继承SDXL的U-Net架构，没有对模型架构做改进（这也意味着基于sdxl进行设计的方法可以较容易迁移到Kolors上）。即使没有对U-Net进行改进，Kolors也表现出卓越的性能，超越了目前的开源方法，达到Midjourney-v6等级水平。相比SDXL和其它文生图模型，Kolors的改进：</p>
+<ol>
+<li><p>在增强文本语义理解方面：</p>
+<ul>
+<li><p>使用General Language Model(GLM)作为text encoder，而非CLIP或T5等。因为GLM具备强的中英文双语理解能力。</p>
+</li>
+<li><p>使用多模态大语言模型来重新标注训练数据集，显著提升Kolors理解综合复杂语义信息的能力，特别是涉及多个实体的语义。</p>
+</li>
+<li><p>通过在训练数据中添加关于中文文字的合成数据和真实数据，提升了模型的中文文本渲染的能力。</p>
+</li>
+</ul>
+</li>
+<li><p>在提升视觉效果方面：</p>
+<ul>
+<li><p>将Kolors的训练分为两个阶段：具有广泛知识的概念学习阶段+使用高美感数据的质量提升阶段。</p>
+</li>
+<li><p>引入一个新的schedule策略，来优化高分辨率图像的生成。</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="增强文本语义理解"><a href="#增强文本语义理解" class="headerlink" title="增强文本语义理解"></a><strong>增强文本语义理解</strong></h3><h4 id="大语言模型作为Text-Encoder"><a href="#大语言模型作为Text-Encoder" class="headerlink" title="大语言模型作为Text Encoder"></a>大语言模型作为Text Encoder</h4><p>不同文生图模型使用的text encoder总结如下表所示：</p>
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/0.jpg" alt="img" style="zoom: 50%;" />
+
+<ul>
+<li>CLIP：被经典方法如sd1.5和DALLE2使用。因为CLIP的训练目标是对齐文本和整个图像的特征，难以理解细粒度的图像描述，如包含多个实体、位置、颜色等描述。</li>
+<li>T5：被Imagen和PixArt-α等模型使用。T5可以捕获更多细粒度的局部信息。</li>
+<li>CLIP&amp;&amp;T5：被eDiff-I和SD3模型使用，可以同时捕获全局语义特征和局部细粒度语义特征表示。</li>
+</ul>
+<p>上述文本编码器只能基于英文。</p>
+<ul>
+<li>HunyuanDiT：利用双语CLIP和多语言T5模型来完成中文文生图的生成。然而，在多语言T5数据集中中文训练预料少于2%，双语CLIP产生的文本编码对复杂prompt的理解能力不充分。</li>
+</ul>
+<p>为了解决以上限制，Kolors选择General Language Model(GLM)作为text encoder，具体选择的是ChatGLM3-6B-Base版本。GLM是一个双语（中英）预训练大语言模型，具有<strong>强的中文理解能力</strong>。且相比于最多77个token的CLIP模型，ChatGLM3具备优越<strong>长文本理解能力</strong>，Kolors将ChatGLM3设置为可接受<strong>256个token</strong>。</p>
+<p>Kolors with CLIP和Kolors with GLM生图对比如下：</p>
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/1.jpg" alt="img" style="zoom: 50%;" />
+
+<h4 id="多模态大语言模型重新细粒度标注训练数据集"><a href="#多模态大语言模型重新细粒度标注训练数据集" class="headerlink" title="多模态大语言模型重新细粒度标注训练数据集"></a>多模态大语言模型重新细粒度标注训练数据集</h4><p>训练T2I使用的text-image对通常来自于网络，对应的标注充满噪声和不准确性。效仿DALL-E3，Kolors使用多模态大语言模型重新标注text-image pairs。</p>
+<p>对不同多模态大语言模型进行评估，评估结果如下表所示：</p>
+<p><img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/2.jpg" alt="img"></p>
+<p>其中，LLaVA1.5-13B、CogAgent-VQA、CogVLM-1.1-chat的结果是从英文翻译成中文得到的（因为这几个模型生成英文能力更强）。GPT4-V的结果最好，但是它是昂贵耗时的；为此Kolors选择CogVLM-1.1-chat来重新进行标注。</p>
+<p>考虑到MLLM可能无法识别图像中不存在于其知识语料库中的特定概念，Kolors采用了一种使用50%原始描述与50%合成描述比率的策略进行训练（和sd3的训练配置一致）。</p>
+<h4 id="增强中文文本渲染能力"><a href="#增强中文文本渲染能力" class="headerlink" title="增强中文文本渲染能力"></a>增强中文文本渲染能力</h4><p>在文生图中渲染文字一直是一个有挑战性的问题。stable diffusion3和dalle-3展现出很强的渲染英文文本能力。然而，渲染中文文本依然存在挑战，主要原因：</p>
+<ol>
+<li>与英语相比，大量的汉字和这些汉字复杂的纹理使中文文本的翻译更具挑战性。</li>
+<li>缺乏足够的训练数据，包括中文文本和相关图像，导致模型训练和拟合能力不足。</li>
+</ol>
+<p>Kolors通过整合合成数据和真实数据，提升了模型对中文文本渲染的能力。</p>
+<ul>
+<li>synthetic data：选择了50000个常用词，使用合成的方法构建数千万图文对的训练数据集。这些数据在概念学习阶段被学习。</li>
+<li>real-world data：为了增强生成图像的真实感，利用OCR和多模态大语言模型来生成真实世界描述，如海报和场景文字，得到百万个样本。</li>
+</ul>
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/3.jpg" alt="img" style="zoom: 50%;" />
+
+<h3 id="提升视觉效果"><a href="#提升视觉效果" class="headerlink" title="提升视觉效果"></a><strong>提升视觉效果</strong></h3><h4 id="高质量数据"><a href="#高质量数据" class="headerlink" title="高质量数据"></a>高质量数据</h4><p>Kolors的训练被分为两个阶段：概念学习阶段和质量提升阶段。</p>
+<p>在概念学习阶段，模型从大规模数据集中学习综合知识和概念。该阶段数据来自public datasets(LAION,DataComp,JourneyDB)。</p>
+<p>在质量提升阶段，模型关注提升图像细节和美感。为了获得高美感数据，首先对数据集应用了传统的过滤方法(如分辨率、OCR精度、人脸数量、清晰度和美学得分)，从而将数据集缩减到约数千万张图像。这些图像随后经过人工标注，标注被分为五个不同的级别。为了减轻主观偏差,每张图像都进行了三次标注，最终级别通过投票决定。不同级别图像的特征如下:</p>
+<ul>
+<li>第1级:包含色情、暴力、血腥或恐怖内容的不安全图像。</li>
+<li>第2级:显示人工合成痕迹的图像,如包含LOGO、水印、黑白边框、拼接等。</li>
+<li>第3级:存在参数错误的图像,如模糊、过曝、欠曝或主题不清晰。</li>
+<li>第4级:普通快照级别的平凡照片。</li>
+<li>第5级:具有高美学价值的优质照片,不仅曝光、对比度、色调和饱和度适当,还能传达一定的叙事性。</li>
+</ul>
+<p>这种方法最终产生了数百万张第5级的高美学图像,这些图像被用于质量提升阶段。</p>
+<h4 id="针对高分辨率的训练"><a href="#针对高分辨率的训练" class="headerlink" title="针对高分辨率的训练"></a>针对高分辨率的训练</h4><p>由于在正向扩散过程中对图像的破坏不足，扩散模型在高分辨率下的表现往往不佳。如下图所示，当按照SDXL中提供的scheduler添加噪声时，低分辨率图像会退化为近乎纯噪声，而高分辨率图像往往在最终阶段保留低频分量。由于模型在推理过程中必须从纯高斯噪声开始，这种差异可能会导致高分辨率下训练和推理之间的不一致（训练时T=1000不是纯噪声，而推理时T=1000是纯噪声）。</p>
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/4.jpg" alt="img" style="zoom:67%;" />
+
+<p>Kolors选择基于DDPM的训练方法。在概念学习的低分辨率训练阶段，采用和SDXL相同的noise scheduler。在高分辨率训练阶段，引入一个新的schedule，它将步数从1000扩展到1100，使模型达到一个更低的最终信噪比。在此过程，调整 $\beta$来维持$\bar \alpha$曲线不变。如下图所示，Kolors的$\bar \alpha$曲线包含了sdxl的$\bar \alpha$曲线，而其它方法都存在偏差。这表明，从低分辨率的base schedule迁移到新的schedule时，与其它schedule相比，此schedule在适应和学习难度方面都有所降低。</p>
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/5.jpg" alt="img" style="zoom:67%;" />
+
+<p>如下图所示，通过集成高质量训练数据和优化的高分辨率训练技巧，生成图片的质量大幅提升。</p>
+<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/6.jpg" alt="img" style="zoom: 50%;" />
+
+<p>此外，Kolors在高分辨率训练阶段应用NovelAI的bucketed采样方法，训练生成不同分辨率大小的图像，如下图所示：</p>
+<p><img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/7.jpg" alt="img"></p>
+<h2 id="评估"><a href="#评估" class="headerlink" title="评估"></a>评估</h2><p><img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/8.jpg" alt="img"></p>
+<h2 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h2><ol>
+<li>快手将发布基于Kolors的多个应用，如ControlNet、IP-Adapter等。</li>
+<li>计划发布基于Transformer架构的扩散模型。</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://example.com">梦游娃娃</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/posts/15-diffusion-models/">http://example.com/posts/15-diffusion-models/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">披星戴月思想家</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/T2I-Diffusion-Models/">T2I Diffusion Models</a></div><div class="post_share"><div class="social-share" data-image="/image/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/posts/14-diffusion-models/" title="扩散模型（十四）｜Image-Conditioned T2I：IP-Adapter"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">扩散模型（十四）｜Image-Conditioned T2I：IP-Adapter</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/image/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">梦游娃娃</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">24/05/15: Finding an internship is all you need.<br>
+<strike>24/02/02: Sleep is all you need.</strike>
+</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A2%9E%E5%BC%BA%E6%96%87%E6%9C%AC%E8%AF%AD%E4%B9%89%E7%90%86%E8%A7%A3"><span class="toc-number">1.1.</span> <span class="toc-text">增强文本语义理解</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E4%BD%9C%E4%B8%BAText-Encoder"><span class="toc-number">1.1.1.</span> <span class="toc-text">大语言模型作为Text Encoder</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%9A%E6%A8%A1%E6%80%81%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E9%87%8D%E6%96%B0%E7%BB%86%E7%B2%92%E5%BA%A6%E6%A0%87%E6%B3%A8%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.1.2.</span> <span class="toc-text">多模态大语言模型重新细粒度标注训练数据集</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A2%9E%E5%BC%BA%E4%B8%AD%E6%96%87%E6%96%87%E6%9C%AC%E6%B8%B2%E6%9F%93%E8%83%BD%E5%8A%9B"><span class="toc-number">1.1.3.</span> <span class="toc-text">增强中文文本渲染能力</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E5%8D%87%E8%A7%86%E8%A7%89%E6%95%88%E6%9E%9C"><span class="toc-number">1.2.</span> <span class="toc-text">提升视觉效果</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AB%98%E8%B4%A8%E9%87%8F%E6%95%B0%E6%8D%AE"><span class="toc-number">1.2.1.</span> <span class="toc-text">高质量数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%92%88%E5%AF%B9%E9%AB%98%E5%88%86%E8%BE%A8%E7%8E%87%E7%9A%84%E8%AE%AD%E7%BB%83"><span class="toc-number">1.2.2.</span> <span class="toc-text">针对高分辨率的训练</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%84%E4%BC%B0"><span class="toc-number">2.</span> <span class="toc-text">评估</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B1%95%E6%9C%9B"><span class="toc-number">3.</span> <span class="toc-text">展望</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/15-diffusion-models/" title="扩散模型（十五）｜T2I Diffusion Models：Kolors">扩散模型（十五）｜T2I Diffusion Models：Kolors</a><time datetime="2024-08-05T16:00:00.000Z" title="发表于 2024-08-06 00:00:00">2024-08-06</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/14-diffusion-models/" title="扩散模型（十四）｜Image-Conditioned T2I：IP-Adapter">扩散模型（十四）｜Image-Conditioned T2I：IP-Adapter</a><time datetime="2024-03-06T16:00:00.000Z" title="发表于 2024-03-07 00:00:00">2024-03-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/13-diffusion-models/" title="扩散模型（十三）| DreamBooth">扩散模型（十三）| DreamBooth</a><time datetime="2024-03-03T16:00:00.000Z" title="发表于 2024-03-04 00:00:00">2024-03-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/12-diffusion-models/" title="扩散模型（十二）| LoRA">扩散模型（十二）| LoRA</a><time datetime="2024-02-27T16:00:00.000Z" title="发表于 2024-02-28 00:00:00">2024-02-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/11-diffusion-models/" title="扩散模型（十一）| Transformer-based Diffusion：DiT">扩散模型（十一）| Transformer-based Diffusion：DiT</a><time datetime="2024-02-19T16:00:00.000Z" title="发表于 2024-02-20 00:00:00">2024-02-20</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/image/cover.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By 梦游娃娃</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container').forEach(node => {
+            if (node.hasAttribute('display')) {
+              btf.wrap(node, 'div', { class: 'mathjax-overflow' })
+            } else {
+              btf.wrap(node, 'span', { class: 'mathjax-overflow' })
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
