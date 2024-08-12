@@ -1,12 +1,12 @@
 ---
-title: 扩散模型（十三）| DreamBooth
+title: 扩散模型（十三）| 主题生成：DreamBooth
 date: 2024-03-04
 mathjax: true
 cover: false
 category:
  - Diffusion model
 tag:
- - PEFT
+ - 主题生成
 ---
 
 > DreamBooth：Fine Tuning Text-to-Image Diffusion Models for Subject-Driven Generation

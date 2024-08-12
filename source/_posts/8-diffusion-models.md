@@ -1,12 +1,12 @@
 ---
-title: 扩散模型（八）| ControlNet
+title: 扩散模型（八）| Image-Conditioned T2I：ControlNet
 date: 2024-01-19
 mathjax: true
 cover: false
 category:
  - Diffusion model
 tag:
- - ControlNet
+ - Image-Conditioned T2I
 ---
 
 > Adding Conditional Control to Text-to-Image Diffusion Models-2302

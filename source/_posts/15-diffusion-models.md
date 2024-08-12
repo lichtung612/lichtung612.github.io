@@ -1,5 +1,5 @@
 ---
-title: 扩散模型（十五）｜T2I Diffusion Models：Kolors
+title: 扩散模型（十六）｜T2I Diffusion Models：Kolors
 date: 2024-08-06
 mathjax: true
 cover: false
