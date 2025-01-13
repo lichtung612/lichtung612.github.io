@@ -36,7 +36,7 @@ tag:
 
 FID分数和人类的视觉判断是比较一致的，并且计算复杂度不高；缺点是高斯分布的假设过于简化。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/0.jpg" alt="img" style="zoom:30%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/0.jpg" alt="img" style="zoom:30%;" />
 
 ### IS(Inception Score)
 
@@ -87,29 +87,29 @@ NLL指标是一个在生成模型中广泛使用的指标，优化对数似然�
 
 前向传播过程初始定义：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/1.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/1.jpg" alt="img" style="zoom:67%;" />
 
 如果T足够大，最终 $x_T$满足高斯分布；如果我们知道逆向分布 $q(x_{t-1}|x_t)$，从高斯分布中采样一个噪声 $x_T$，通过很多逆向过程就可以推导出 $x_0$。然而， $q(x_{t-1}|x_t)$依赖整个数据分布，无法直接求出。假设其是一个高斯分布：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/2.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/2.jpg" alt="img" style="zoom:67%;" />
 
 可以写出它的变分下届（VLB，variational lower bound)：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/3.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/3.jpg" alt="img" style="zoom:67%;" />
 
 【注意：这里的 $L_{vlb}$相当于真实的VLB的负数。即本来应该使VLB越大越好，现在变成使 $L_{vlb}$越小越好】
 
 式子（4）中 $L_T$不依赖于网络参数 $\theta$， $L_0$可以计算出，重点看中间的 $L_{t-1}$项。我们希望 $L_{t-1}$尽可能小，即希望这两个分布接近，即可以使用 $q(x_{t-1}|x_t,x_0)$的分布拟合我们想计算的 $p_\theta(x_{t-1}|x_t)$。结合重参数化技术和贝叶斯定理，可以推出 $q(x_{t-1}|x_t,x_0)$的分布：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/4.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/4.jpg" alt="img" style="zoom:67%;" />
 
 式子（11）还可以被写成：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/5.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/5.jpg" alt="img" style="zoom:67%;" />
 
 DDPM中，网络可以通过预测 $x_0$来拟合均值，也可以通过预测噪声来拟合均值。实验发现预测噪声效果更好。预测噪声使用MSE平方误差损失：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/6.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/6.jpg" alt="img" style="zoom:67%;" />
 
 可以发现 $L_{simple}$**并没有学习方差**，仅仅学习均值。DDPM实验发现，当方差设置为 $\sigma_t^2=\beta_t$**或者** $\sigma_t^2=\widetilde\beta_t$**时，样本生成质量差不多一致（** $\beta_t$**和** $\widetilde\beta_t$**分别是方差的上界和下界）**。
 
@@ -119,11 +119,11 @@ DDPM中，网络可以通过预测 $x_0$来拟合均值，也可以通过预测�
 
 首先探究为什么方差设置为 $\sigma_t^2=\beta_t$或者 $\sigma_t^2=\widetilde\beta_t$时，样本生成质量差不多一致。作者进行实验，发现只有在趋近t=0时，$\beta_t$和 $\widetilde\beta_t$不太一致，其余情况下它们均几乎相等。此外，当增加扩散步数，$\beta_t$和 $\widetilde\beta_t$在更多的扩散步骤中保持一致（更加紧密）。这表示在扩散步数趋于无限时，方差的选择对样本生成质量来说不是很重要。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/7.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/7.jpg" alt="img" style="zoom:67%;" />
 
 然而，对于极大似然来说，如下图所示，diffusion过程中步数较小时对变分下界的优化最重要。因此，我们可以通过设计一个更好的方差学习方案来优化对数似然。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/8.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/8.jpg" alt="img" style="zoom:67%;" />
 
 因为方差 $Σ_\theta(x_t,t)$的变化范围很小，所以直接训练网络预测方差是比较困难的。所以，IDDPM提出来优化$\beta_t$和 $\widetilde\beta_t$的差值。模型输出一个向量 $v$，方差如下计算：
 
@@ -143,19 +143,19 @@ DDPM中，网络可以通过预测 $x_0$来拟合均值，也可以通过预测�
 
 Linear schedule更适用于高分辨率图像，不太适合低分辨率图像，它的前向过程添加噪声太快了：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/9.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/9.jpg" alt="img" style="zoom:80%;" />
 
 如下图所示，可以看出一个使用linear schedule的模型当删掉20%的逆向过程时，还可以取得高的FID得分（证明很多步骤比较冗余）：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/10.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/10.jpg" alt="img" style="zoom:67%;" />
 
 为了解决这个问题，让扩散模型学习更多的细节，IDDPM提出cosine schedule：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/11.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/11.jpg" alt="img" style="zoom:67%;" />
 
 cosine schedule的alpha值随着时间步缓慢改变，防止突变：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/12.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/12.jpg" alt="img" style="zoom:67%;" />
 
  $\beta_t = 1-\frac{\bar\alpha_t}{\bar\alpha_{t-1}}$，为了防止当t很小的时候 $\beta_t$太小，添加offset s，因为实验发现当一开始噪声添加太小会影响噪声预测。s = 0.008。
 
@@ -165,15 +165,15 @@ IDDPM期望直接通过优化 $L_{vlb}$来完成最好的log-likelihoods，而�
 
 作者假设 $L_{vlb}$的梯度中噪声比$L_{hybrid}$更多。图2可以看出，不同的扩散步骤中噪声是不同的。假设均匀采样时间步t造成 $L_{vlb}$优化过程中不必要的噪声。于是提出importance sampling：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/13.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/13.jpg" alt="img" style="zoom:67%;" />
 
 通过importance sampling，直接优化 $L_{vlb}$可以达到最好的log-likelihoods结果。然而，这项技术对优化较少噪声的 $L_{hybrid}$帮助不大。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/14.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/14.jpg" alt="img" style="zoom:67%;" />
 
 ## 实验
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/15.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/15.jpg" alt="img" style="zoom:67%;" />
 
 ## 加快采样速度
 
@@ -181,8 +181,8 @@ $L_{hybrid}$模型可以减少很多扩散步数，同时产生高质量样本�
 
 可以使用任意的具有t个值的序列S来采样。给定 $\bar\alpha_t$，对于给定的序列S可以得到 $\bar\alpha_{S_t}$，进而可以得到：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/16.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/16.jpg" alt="img" style="zoom:67%;" />
 
 实践中，DDPM和IDDPM使用1和T之间的K个等距实数得到具有K个时间步值的序列。评估结果如下图所示，可以看出对于IDDPM来说，t=100就可以得到不错的FID分数。对于DDIM，发现DDIM可以在采样步数小于50时得到更好的结果，但是当使用更多的步数，DDIM效果不如IDDPM。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/2-diffusion-models/17.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/2-diffusion-models/17.jpg" alt="img" style="zoom:67%;" />

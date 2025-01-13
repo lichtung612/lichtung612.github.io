@@ -24,7 +24,7 @@ tag:
 
 上面是闭源相关，下面是开源相关模型。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/0.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/13-diffusion-models/0.jpg)
 
 ## 历史生成式方法
 
@@ -34,7 +34,7 @@ GAN包含生成器(Generator)和判别器(Discriminator)。
 
 生成器根据随机噪音z生成图片x'；生成图片x'和真实图片x被送入判别器中，判别是真图片还是假图片。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/1.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/13-diffusion-models/1.jpg)
 
 训练的时候先固定生成器，只训练判别器，此过程只更新判别器参数，不更新生成器参数；之后训练生成器，此过程只更新生成器参数，不更新判别器参数。训练过程二者相互对抗，交替训练。
 
@@ -58,7 +58,7 @@ GAN模型缺点：
 
   输入x，经过encoder得到特征z，z的特征维度一般很小，z经过decoder得到图像x'。训练目标希望x'尽可能和x接近。因为是自己重建自己的过程，所以是自编码器。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/2.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/13-diffusion-models/2.jpg)
 
 - Denoising autoencoder
 
@@ -66,7 +66,7 @@ GAN模型缺点：
 
   DAE比AE效果好，依据原理是因为图像的像素的冗余性太高，尽管对之前图像做一些污染，仍能重建出原图，并且生成图像的多样性有所提高。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/3.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/13-diffusion-models/3.jpg)
 
 - VAE(Variational Auto-encoder)
 
@@ -76,7 +76,7 @@ GAN模型缺点：
 
   因为VAE学习的是一个概率分布，生成图片的多样性比GAN要好很多，且训练更稳定。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/4.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/13-diffusion-models/4.jpg)
 
 ### VQVAE
 
@@ -88,7 +88,7 @@ codebook可以理解为聚类的中心，大小为KxD。K一般为8192，D为512
 
 因为中间特征不是一个分布，而是一个代表前面图像信息的从codebook里面取出的压缩特征，所以VQVAE更适合用于分类、检测、分割任务，而非生成，VQVAE更类似AE，而不是VAE。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/5.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/13-diffusion-models/5.jpg)
 
 ### DALL-E
 
@@ -100,13 +100,13 @@ image使用VQVAE,把256x256图像压缩成32x32图片token。(dVAE：discrete VA
 
 256个text token和1024个图像token进行拼接，得到长度为1280的token，将此token送入GPT进行生成训练。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/6.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/13-diffusion-models/6.jpg)
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/7.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/13-diffusion-models/7.jpg)
 
 推理阶段，进行文生图任务时，只输入text，对text编码之后进入GPT解码出image tokens，之后将image tokens通过VQVAE的codebook得到Latent code，再送入VQVAE的decoder解码出原图片。可以生成很多张图片，根据CLIP分数进行筛选。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/8.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/13-diffusion-models/8.jpg)
 
 ## 概述
 
@@ -118,7 +118,7 @@ DALL-E2是一个二阶段模型：prior阶段利用给定的文本描述生成CL
 
 下图为DALL-E2流程。文本首先经过CLIP的text encoder得到text embedding，这一步骤无需训练，直接使用frozen的权重。之后text embedding经过prior网络得到image embedding，这一阶段使用CLIP模型中文本图像对的text embedding和img embedding进行监督学习。之后image embedding经过decoder得到图像。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/9.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/13-diffusion-models/9.jpg)
 
 实验表明，DALL-E2生成的图像逼真多样（GAN生成的图像保真度好，但不多样）。
 
@@ -130,7 +130,7 @@ Prior也采用扩散模型。因为输入输出是embedding，所以不再使用
 
 与一般工作使用噪声预测不同，DALL-E2训练模型来直接预测embedding $z_i$，使用平方误差损失：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/10.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/13-diffusion-models/10.jpg)
 
 ### Decoder
 
@@ -139,7 +139,7 @@ Prior也采用扩散模型。因为输入输出是embedding，所以不再使用
 
 >  图片出处：https://zhuanlan.zhihu.com/p/648389187
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/13-diffusion-models/11.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/13-diffusion-models/11.jpg)
 
 - 采用级联模型，训练2个diffusion upsampler models。第一个模型从64x64->256x256，第二个模型从256->1024。为了提升上采样的鲁棒性，在训练过程中轻度破坏图片，如使用gaussian blur等。
 - 采用classifier-free guidance，训练过程随机以10%的概率将CLIP embeddings设置为0，随机以50%的概率丢弃text capltion。

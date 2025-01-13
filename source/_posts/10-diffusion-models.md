@@ -28,11 +28,11 @@ tag:
 - U-ViT即使不优于类似大小的基于CNN的U-Net,也具有可比性。特别地，在不访问大型外部数据集的方法中，U-ViT在ImageNet 256x256 class-conditional生成任务中取得破纪录的FID 2.29分，MS-COCO text-to-image生成任务中取得5.48分。
 - 对于扩散模型图像建模，长距离跳跃连接是至关重要的，而基于CNN的U-Net中上采样和下采样操作不是必要的。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/0.jpg" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/8-diffusion-models/0.jpg" alt="img" style="zoom:50%;" />
 
 ## 模型架构设计
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/1.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/8-diffusion-models/1.jpg)
 
 如上图所示为不同的设计方案，在进行实验后U-ViT选择了各种方案中FID分数最好的方案，带*号表示U-ViT的选择。
 
@@ -44,7 +44,7 @@ tag:
 
 ## 缩放能力
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/2.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/8-diffusion-models/2.jpg)
 
 上图通过缩放深度（层数）、宽度（隐藏层的维度）、patch size探究了U-ViT的缩放能力。
 
@@ -56,7 +56,7 @@ tag:
 
 同等参数量和计算量下（U-ViT：501M parameters,133 GFLOPs；U-Net：646M parameters,135 GFLOPs），在classifier-free guidance的情况下U-ViT在不同的训练迭代中始终优于U-Net。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/3.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/8-diffusion-models/3.jpg)
 
 ## 实验
 
@@ -66,13 +66,13 @@ tag:
 
 从下表可以看出，U-ViT在图像无条件生成以及类别条件生成上取得了和其他模型可比或者更优的FID。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/4.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/8-diffusion-models/4.jpg)
 
 #### 潜在空间建模性能
 
 U-ViT在ImageNet256数据集上取得了SOTA的FID，可以发现其在潜在空间性能更好。和用U-Net建模特征空间的[Latent Diffusion](https://link.zhihu.com/?target=https%3A//arxiv.org/abs/2112.10752) 相比，在使用相同采样器（dpm_solver）和相同采样步数的情况下，U-ViT均能取得更优的表现。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/6.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/8-diffusion-models/6.jpg)
 
 ### Text-to-Image Generation on MS-COCO
 
@@ -80,10 +80,10 @@ U-ViT在ImageNet256数据集上取得了SOTA的FID，可以发现其在潜在空
 
 U-ViT展现了杰出的多模态融合能力，在没有额外数据的情况下，U-ViT取得了MS-COCO数据集上text-to-image generation任务的SOTA FID。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/7.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/8-diffusion-models/7.jpg)
 
 #### 图像与文本匹配质量更高
 
 如下图显示了U-Net和U-ViT使用相同随机种子生成的样本，发现U-ViT生成了更多高质量的样本，同时语义与文本匹配得更好。例如，给定文本“棒球运动员向球挥动球棒”，U-Net既不生成球棒也不生成球。相比之下，U-ViT-S在更少的训练参数下可以生成球，而我们的U-ViT-S（Deep）更近一步把球和球棒都生成出来。我们假设这是因为文本和图像在U-ViT的每一层都有交互，这比只在cross attention层交互的U-Net更频繁。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/8-diffusion-models/8.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/8-diffusion-models/8.jpg)

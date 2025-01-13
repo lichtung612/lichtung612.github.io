@@ -29,7 +29,7 @@ Imagen，一个text-to-image diffusion模型，同时结合大语言模型和扩
 
 Imagen架构如下图所示：使用一个frozen text encoder（T5-XXL）来将输入文本编码成text embeddings。一个条件扩散模型将text embedding生成64x64图片，之后利用超分模型上采样图像，从64x64->256x256，之后256x256->1024x1024。全部的diffusion模型都以文本嵌入序列为条件，使用classifier-free guidance。Imagen依靠新的采样技术（dynamic thresholding），在不降低样本质量的情况下使用大的指导权重，生成图像质量更好。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/0.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/11-diffusion-models/0.jpg" alt="img" style="zoom:80%;" />
 
 ## 方法
 
@@ -43,11 +43,11 @@ Imagen探索了几种预训练的text encoders：BERT、T5、CLIP。冻结这些
 
 （2）当T5-XXL和CLIP在简单的benchmark如MS-COCO上的FID和CLIP评价指标相似时，人类的评估通常更偏向T5-XXL（图5(a)中CLIP和T5-XXL的分数类似，但是图5（b）中可以看出T5-XXL在文本图像对齐和图像保真度方面分数都比CLIP要高）。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/1.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/11-diffusion-models/1.jpg)
 
 （3）缩放text encoder size比缩放U-Net size更重要。如下图所示，缩放text encoder比缩放U-Net的FID分数变化更明显。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/2.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/11-diffusion-models/2.jpg)
 
 ### Large guidance weight samplers
 
@@ -63,13 +63,13 @@ Imagen探索了几种预训练的text encoders：BERT、T5、CLIP。冻结这些
 
   引入了一种新的动态阈值化方法：在每个采样步骤，将s设置为 $\hat x_0^t$的某个百分位数对应的值，如果s>1，则将所有数阈值化到范围[−s，s]，然后除以s。动态阈值处理将饱和像素（接近-1和1的像素）向内推，从而防止像素在每一步饱和。（比如数据为[1,2,3,4,5]，百分位数为80%，则s为4，数据首先根据阈值4进行裁剪，变为[1,2,3,4,4]，之后除以4，变成[0.24,0.5,0.75,1,1]；如果采用static thresholding，则数据变为[1,1,1,1,1]）
 
-  ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/3.jpg)
+  ![img](https://files.hoshinorubii.icu/lichtung612/2024/11-diffusion-models/3.jpg)
 
   实验发现，当使用非常大的指导权重时，动态阈值可以显著改善照片真实性以及实现更好的图像-文本对齐。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/4.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/11-diffusion-models/4.jpg)
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/5.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/11-diffusion-models/5.jpg)
 
 ### Robust cascaded diffusion models
 
@@ -77,7 +77,7 @@ Imagen探索了几种预训练的text encoders：BERT、T5、CLIP。冻结这些
 
 给定一个低分辨率图像和增强水平（aug_level），使用此增强来破坏低分辨率图像，在破坏后的图像上进行diffusion。训练过程中,aug_level被随机选择；推理过程中，使用不同aug_level值进行生成，找到最佳的样本。Imagen使用高斯噪声作为增强，$aug\\_level \in [0,1]$。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/6.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/11-diffusion-models/6.jpg)
 
 实验表明，具有noise conditioning augmentation的超分模型产生更好的CLIP和FID得分。在推理阶段向低分辨率图像中添加噪声+使用大的guidance权重允许超分模型生成更多样的上采样结果，同时移除了低分辨率图像中的量化伪影。
 
@@ -89,7 +89,7 @@ Imagen探索了几种预训练的text encoders：BERT、T5、CLIP。冻结这些
 
   Text condition选择cross attention。如下图所示，Mean pooling, attention pooling, cross attention三种条件注入方式中cross attention效果最好。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/7.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/11-diffusion-models/7.jpg)
 
 - Super-resolution model
 
@@ -114,10 +114,10 @@ Imagen探索了几种预训练的text encoders：BERT、T5、CLIP。冻结这些
 
   Imagen outperforming the concurrent work of DALL-E2 and even models trained on COCO.
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/8.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/11-diffusion-models/8.jpg)
 
 - Results on DrawBench
 
   Imagen和DALL-E2、GLIDE、Latent Diffusion、CLIP-guided VQ-GAN比较结果：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/11-diffusion-models/9.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/11-diffusion-models/9.jpg)

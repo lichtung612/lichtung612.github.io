@@ -40,7 +40,7 @@ tag:
 
 不同文生图模型使用的text encoder总结如下表所示：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/0.jpg" alt="img" style="zoom: 50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/15-diffusion-models/0.jpg" alt="img" style="zoom: 50%;" />
 
 - CLIP：被经典方法如sd1.5和DALLE2使用。因为CLIP的训练目标是对齐文本和整个图像的特征，难以理解细粒度的图像描述，如包含多个实体、位置、颜色等描述。
 - T5：被Imagen和PixArt-α等模型使用。T5可以捕获更多细粒度的局部信息。
@@ -54,7 +54,7 @@ tag:
 
 Kolors with CLIP和Kolors with GLM生图对比如下：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/1.jpg" alt="img" style="zoom: 50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/15-diffusion-models/1.jpg" alt="img" style="zoom: 50%;" />
 
 #### 多模态大语言模型重新细粒度标注训练数据集
 
@@ -62,7 +62,7 @@ Kolors with CLIP和Kolors with GLM生图对比如下：
 
 对不同多模态大语言模型进行评估，评估结果如下表所示：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/2.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/15-diffusion-models/2.jpg)
 
 其中，LLaVA1.5-13B、CogAgent-VQA、CogVLM-1.1-chat的结果是从英文翻译成中文得到的（因为这几个模型生成英文能力更强）。GPT4-V的结果最好，但是它是昂贵耗时的；为此Kolors选择CogVLM-1.1-chat来重新进行标注。
 
@@ -80,7 +80,7 @@ Kolors通过整合合成数据和真实数据，提升了模型对中文文本�
 - synthetic data：选择了50000个常用词，使用合成的方法构建数千万图文对的训练数据集。这些数据在概念学习阶段被学习。
 - real-world data：为了增强生成图像的真实感，利用OCR和多模态大语言模型来生成真实世界描述，如海报和场景文字，得到百万个样本。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/3.jpg" alt="img" style="zoom: 50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/15-diffusion-models/3.jpg" alt="img" style="zoom: 50%;" />
 
 ### **提升视觉效果**
 
@@ -104,23 +104,23 @@ Kolors的训练被分为两个阶段：概念学习阶段和质量提升阶段�
 
 由于在正向扩散过程中对图像的破坏不足，扩散模型在高分辨率下的表现往往不佳。如下图所示，当按照SDXL中提供的scheduler添加噪声时，低分辨率图像会退化为近乎纯噪声，而高分辨率图像往往在最终阶段保留低频分量。由于模型在推理过程中必须从纯高斯噪声开始，这种差异可能会导致高分辨率下训练和推理之间的不一致（训练时T=1000不是纯噪声，而推理时T=1000是纯噪声）。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/4.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/15-diffusion-models/4.jpg" alt="img" style="zoom:67%;" />
 
 Kolors选择基于DDPM的训练方法。在概念学习的低分辨率训练阶段，采用和SDXL相同的noise scheduler。在高分辨率训练阶段，引入一个新的schedule，它将步数从1000扩展到1100，使模型达到一个更低的最终信噪比。在此过程，调整 $\beta$来维持$\bar \alpha$曲线不变。如下图所示，Kolors的$\bar \alpha$曲线包含了sdxl的$\bar \alpha$曲线，而其它方法都存在偏差。这表明，从低分辨率的base schedule迁移到新的schedule时，与其它schedule相比，此schedule在适应和学习难度方面都有所降低。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/5.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/15-diffusion-models/5.jpg" alt="img" style="zoom:67%;" />
 
 如下图所示，通过集成高质量训练数据和优化的高分辨率训练技巧，生成图片的质量大幅提升。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/6.jpg" alt="img" style="zoom: 50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/15-diffusion-models/6.jpg" alt="img" style="zoom: 50%;" />
 
 此外，Kolors在高分辨率训练阶段应用NovelAI的bucketed采样方法，训练生成不同分辨率大小的图像，如下图所示：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/7.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/15-diffusion-models/7.jpg)
 
 ## 评估
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/15-diffusion-models/8.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/15-diffusion-models/8.jpg)
 
 ## 展望
 

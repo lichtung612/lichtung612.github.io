@@ -39,7 +39,7 @@ tag:
 
   下图展示GPU上，batchsize=8，相同FLOPs的模型具有不同的推理速度(ShuffleNet v2)：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/0.jpg" alt="img" style="zoom:70%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/0.jpg" alt="img" style="zoom:70%;" />
 
 - **Latency**
   -  指从输入数据传入模型到模型输出结果可用之间的时间间隔。它衡量了模型处理单个样本所需的时间。
@@ -52,11 +52,11 @@ tag:
   
     （2）CNN模型相对transformer模型在相同FLOPs和参数量下具有更低的latency
 
-| ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/1.jpg) | ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/2.jpg) |
+| ![img](https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/1.jpg) | ![img](https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/2.jpg) |
 | :----------------------------------------------------------: | :----------------------------------------------------------: |
 |                       FLOPS vs Latency                       |                  Parameter Count vs Latency                  |
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/3.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/3.jpg" alt="img" style="zoom:67%;" />
 
 ## 经典模块
 
@@ -69,7 +69,7 @@ tag:
 - Depthwise convolution：卷积核拆分成单通道，不改变图像深度情况下，对每一通道进行卷积操作。节省参数量，关注长宽方向空间信息
 - Pointwise convolution：将不同通道特征融合，关心跨通道信息；对特征图进行升维和降维
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/conv.png" alt="img" style="zoom: 50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/conv.png" alt="img" style="zoom: 50%;" />
 
 ### Inverted residual
 
@@ -80,7 +80,7 @@ tag:
 - 在高维空间做DW卷积。即先用PW升维，之后DW，之后PW降维。在高维空间可以保证信息丢失更少。
 - 添加残差连接
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/6.jpg" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/6.jpg" alt="img" style="zoom:50%;" />
 
 ### Squeeze-and-excite
 
@@ -96,9 +96,9 @@ $F_{scale}$:用sigmoid将输出限制到[0，1]的范围，把这个值作为sca
 
 SE层原理：通过控制scale的大小，把重要的通道特征增强，不重要的通道特征减弱，从而让提取的特征指向性更强
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/7.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/7.jpg)
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/8.jpg" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/8.jpg" alt="img" style="zoom:50%;" />
 
 ### Structural reparameterization
 
@@ -108,7 +108,7 @@ SE层原理：通过控制scale的大小，把重要的通道特征增强，不�
 
 RepVGG架构如下：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/9.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/9.jpg" alt="img" style="zoom:67%;" />
 
 ## RepViT
 
@@ -124,7 +124,7 @@ RepVGG架构如下：
 
 本文：重新研究高效轻量级CNN和ViT，通过将轻量级ViT的架构融合进标准轻量级CNN架构MobileNet v3中，来增强轻量级CNN的移动设备友好性。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/10.jpg" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/10.jpg" alt="img" style="zoom:50%;" />
 
 ### 背景
 
@@ -132,7 +132,7 @@ RepVGG架构如下：
 
 Mobilenet V3 block: Inverted residual + Squeeze-and-Excite
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/11.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/11.jpg" alt="img" style="zoom:67%;" />
 
 #### MetaFormer
 
@@ -142,7 +142,7 @@ Mobilenet V3 block: Inverted residual + Squeeze-and-Excite
 
 观点：ViTs的有效性主要来自它们通用的token mixer和channel mixer结构，即MetaFormer架构。其性能与特定的token mixer如attention mixer关系不大。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/12.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/12.jpg)
 
 ### 架构
 
@@ -150,9 +150,9 @@ Mobilenet V3 block: Inverted residual + Squeeze-and-Excite
 
 主要根据latency和top-1 accuracy来设计选择模型架构，逐步modernize MobileNetV3-L。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/13.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/13.jpg" alt="img" style="zoom:80%;" />
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/14.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/14.jpg)
 
 #### 对齐训练策略
 
@@ -172,7 +172,7 @@ Mobilenet V3 block: Inverted residual + Squeeze-and-Excite
 
 下图：(a)MobileNetV3块（b)RepViT块训练结构（c)RepViT块推理结构：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/15.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/15.jpg" alt="img" style="zoom:67%;" />
 
 **2. 减小expansion ratio，增加width**
 
@@ -187,7 +187,7 @@ Early convolutions：在轻量级ViT中被广泛采用的stem，用堆叠的stri
 
 如图所示，(a) MobileNetV3-L的stem  (b) RepViT的stem：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/2.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/2.jpg" alt="img" style="zoom:67%;" />
 
 **2. Deeper downsampling layers**
 
@@ -201,11 +201,11 @@ RepViT：用stride=2的depthwise卷积完成降采样，之后2个1x1卷积增�
 
 下图：(a)MobileNetV3-L降采样层 (b)采用RepViT块设计后的降采样层 (c)RepViT最终降采样层结构
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/17.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/17.jpg" alt="img" style="zoom:67%;" />
 
 **3. Simple classifier**
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/18.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/18.jpg" alt="img" style="zoom:67%;" />
 
 **4. Overall stage ratio**
 
@@ -239,7 +239,7 @@ MobileNetV3-L在某些块中包含SE层，主要关注后两个阶段。然而�
 - *Compared with widely used lightweight CNNs, RepViT generally achieves a better trade-off between accuracy and latency*
 - *pure lightweight CNNs can outperform existing state-of-the-art lightweight ViTs on mobile devices by incorporating the efficient architectural designs.* 
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/19.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/19.jpg" alt="img" style="zoom:67%;" />
 
 ## MobileOne
 
@@ -257,7 +257,7 @@ MobileNetV3-L在某些块中包含SE层，主要关注后两个阶段。然而�
 
 比较在30层CNN中不同激活函数的latency：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/20.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/20.jpg" alt="img" style="zoom:67%;" />
 
 #### Architectural Blocks
 
@@ -269,7 +269,7 @@ MobileNetV3-L在某些块中包含SE层，主要关注后两个阶段。然而�
 
   比较在30层CNN中不同架构blocks：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/21.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/21.jpg" alt="img" style="zoom:80%;" />
 
 ### 架构
 
@@ -279,25 +279,25 @@ MobileNetV3-L在某些块中包含SE层，主要关注后两个阶段。然而�
 
 如下图所示，MobileOne block在训练和推理时的架构不同：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/22.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/22.jpg" alt="img" style="zoom:67%;" />
 
 **重参数化分支的影响**：
 
 下表为在ImageNet上的top-1准确率：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/23.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/23.jpg" alt="img" style="zoom:80%;" />
 
 **重参数化因子k**：超参数，范围从1到5。对于MobileOne的较大变体，k增加带来的增益开始减少。对于较小变体MobileOne-S0，通过使用多个参数化分支，性能提升0.5%
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/24.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/24.jpg" alt="img" style="zoom:67%;" />
 
 #### Model Scaling
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/25.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/25.jpg)
 
 MobileOne-S1比和它大3倍的RepVGG-B0性能更好：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/26.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/26.jpg" alt="img" style="zoom:67%;" />
 
 #### Training
 
@@ -305,8 +305,8 @@ MobileOne-S1比和它大3倍的RepVGG-B0性能更好：
 
 使用余弦调度（cosine schedule)来进行学习率的调整。此外，我们也使用相同的调度方法来逐渐减小权重衰减系数。引入progressive learning。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/27.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/27.jpg" alt="img" style="zoom:80%;" />
 
 ### 实验
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-model-architecture/28.jpg" alt="img" style="zoom: 67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-model-architecture/28.jpg" alt="img" style="zoom: 67%;" />

@@ -23,7 +23,7 @@ tag:
 
 假设模型在适配任务时参数的改变量是低秩的，由此引出低秩自适应方法LoRA,通过低秩分解来模拟参数的改变量，从而以极小的参数量来实现大模型的微调。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/10-diffusion-models/0.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/10-diffusion-models/0.jpg" alt="img" style="zoom:67%;" />
 
 ## 做法
 
@@ -47,7 +47,7 @@ tag:
 
 实验结果表明，模型更倾向于我们对更多类型的投影矩阵应用LoRA(对4个投影矩阵应用LoRA时效果是最好的，尽管秩很低，也足以让△W捕捉足够信息)
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/10-diffusion-models/1.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/10-diffusion-models/1.jpg)
 
 ### LoRA代码实现
 
@@ -164,7 +164,7 @@ class MergedLinear(nn.Linear, LoraLayer):
 
 > 分组卷积示例图：
 >
-> <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/10-diffusion-models/2.jpg" alt="img" style="zoom:50%;" />
+> <img src="https://files.hoshinorubii.icu/lichtung612/2024/10-diffusion-models/2.jpg" alt="img" style="zoom:50%;" />
 
 低秩分解部分如何合并到预训练权重中（无推理延迟）：
 
@@ -275,7 +275,7 @@ Adapter层内部：
 - 经过一个非线性层之后，再用一个up-project结构将低维度特征映射回高维特征
 - 添加skip-connection结构，确保在最差情况下能够退化为原模型
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/10-diffusion-models/3.jpg" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/10-diffusion-models/3.jpg" alt="img" style="zoom:50%;" />
 
 ### prefix tuning
 
@@ -283,7 +283,7 @@ Adapter层内部：
 
 该方法和构造prompt类似，只是prompt是人为构造的显式提示，而prefix是可以学习的隐式的表示。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/10-diffusion-models/4.jpg" alt="img" style="zoom: 50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/10-diffusion-models/4.jpg" alt="img" style="zoom: 50%;" />
 
 同时，为了防止直接更新prefix的参数导致训练不稳定的情况，在prefix层前面添加MLP结构（相当于将prefix分解为更小维度的input与MLP的组合后输出的结果），训练完成后，只保留prefix的参数。
 

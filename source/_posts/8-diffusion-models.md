@@ -15,7 +15,7 @@ tag:
 >
 > https://github.com/lllyasviel/ControlNet
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/6-diffusion-models/0.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/6-diffusion-models/0.jpg)
 
 ## 概要
 
@@ -27,7 +27,7 @@ tag:
 
 ### ControlNet
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/6-diffusion-models/1.jpg" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/6-diffusion-models/1.jpg" alt="img" style="zoom:50%;" />
 
 初始输入feature map: $x$，输出feature map: $y$
 
@@ -47,7 +47,7 @@ trainable copy被zero convolution层连接，记为 $Z(,;,)$，一般来说$Z(,;
 
 Stable Diffusion采用U-Net架构。U-Net由一个encoder，一个middle block，一个包含跳跃连接的decoder组成。encoder和decoder都包含12个block，整个模型有25个block。其中，8个block是降采样或者升采样层，其余17个block中每个包含4个resnet层和2个ViT层，其中每个ViT层包含cross-attention和self-attention机制。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/6-diffusion-models/2.jpg" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/6-diffusion-models/2.jpg" alt="img" style="zoom:50%;" />
 
 如图所示，“SD Encoder Block A"包含4个resnet和2个ViT，“x3”表示这个Block重复了3次。
 
@@ -65,7 +65,7 @@ ControlNet结构被应用在U-net的每一个encoder上。具体来说，创造�
 
 训练过程中存在“sudden convergence phenomenon"（模型不是逐渐地学习控制条件，而是在某些步骤忽然get到控制条件，通常小于10K个steps）：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/6-diffusion-models/3.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/6-diffusion-models/3.jpg" alt="img" style="zoom:67%;" />
 
 #### Inference
 
@@ -75,13 +75,13 @@ CFG(Classifier-Free Guidance)公式表示为 $\epsilon_{prd} = \epsilon_{uc}+\be
 
 当一个空间条件图片被添加到ControlNet，它可以被添加到 $\epsilon_{uc}$和 $\epsilon_c$上，或者仅仅被添加到 $\epsilon_c$上。在一些有挑战性的场景，比如当没有prompts的时候，把空间条件图片在 $\epsilon_{uc}$和 $\epsilon_c$上将完全移除CFG guidance（图5b)；仅仅在$\epsilon_c$上添加将使该指导特别强烈（图5c）；解决方式是首先添加条件图片到 $\epsilon_c$上，之后在stable diffusion和ControlNet之间的每个连接上乘以权重 $w_i=64/h_i$，其中 $h_i$是第i个block的size，如 $h_1=8,h_2=16,...,h_{13}=64$。通过减小CFG指导强度，可以完成图5d的效果。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/6-diffusion-models/4.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/6-diffusion-models/4.jpg" alt="img" style="zoom:80%;" />
 
 **Composing multiple ControlNets**
 
 为了同时应用多个条件图片注入，可以直接把ControlNets的输出添加到stable diffusion里。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/6-diffusion-models/5.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/6-diffusion-models/5.jpg" alt="img" style="zoom:67%;" />
 
 ## 代码
 

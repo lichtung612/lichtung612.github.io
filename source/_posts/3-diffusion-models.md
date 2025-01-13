@@ -23,7 +23,7 @@ tag:
 
 公式上，用贝叶斯定理将条件生成概率进行对数分解：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/0.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/3-diffusion-models/0.jpg" alt="img" style="zoom:80%;" />
 
 第二个等号后面最后一项消失了，因为当我们要求模型生成“狗”的图像时，扩散过程始终 $y$不变，对应的梯度也是0，可以抹掉。
 
@@ -97,15 +97,15 @@ Classifier guidance只能用分类模型控制生成的类别，生成的类别�
 
 总体而言，classifier-free guidance需要在训练过程中同时训练模型的两个能力，一个是有条件生成，一个是无条件生成。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/1.jpg" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/3-diffusion-models/1.jpg" alt="img" style="zoom:50%;" />
 
 不同guidance_scale下的图像效果：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/2.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/3-diffusion-models/2.jpg)
 
 ### 推导
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/3.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/3-diffusion-models/3.jpg)
 
 ### U-Net模型如何融入语义信息
 
@@ -117,7 +117,7 @@ Classifier guidance只能用分类模型控制生成的类别，生成的类别�
 
 具体来说是把text embedding作为注意力机制中的key和value，把原始图片表征作为query。相当于计算每张图片和对应句子中单词的一个相似度得分，把得分转换成单词的权重，[权重乘以单词的embedding]加和作为最终的特征。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/4.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/3-diffusion-models/4.jpg" alt="img" style="zoom:80%;" />
 
 ```Python
 import torch 
@@ -183,7 +183,7 @@ out = CrossAttn(x,context)
 >
 > 其中h是残差卷积块中第一个卷积层的输出，y_s和y_b分别是步数和图片分类的embedding向量经过线性层后的投影。实验发现，使用自适应组归一化能够进一步优化FID。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/5.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/3-diffusion-models/5.jpg" alt="img" style="zoom:80%;" />
 
 >  code：https://github.com/huggingface/diffusers/blob/v0.27.2/src/diffusers/models/resnet.py#L353-L364
 
@@ -222,4 +222,4 @@ else:
 
 显然classifier-free guidance效果更好一些，既能生成无穷多的图像类别，又不需要重新训练一个基于噪声的分类模型。当前最常见的是classifier-free guidance。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/3-diffusion-models/6.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/3-diffusion-models/6.jpg)

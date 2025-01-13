@@ -34,7 +34,7 @@ category:
 
 ### Method
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/0.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/0.jpg)
 
 1. 通过一个text caption生成一个合成视角的图像 <- 3-billion参数的在渲染的3D模型数据集上微调的GLIDE模型
 2. 通过合成视角的图像生成一个粗粒度的点云（1024points) <-具有置换不变性的diffusion model
@@ -50,7 +50,7 @@ category:
 
 #### Point Cloud Diffusion
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/1.jpg" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/1.jpg" alt="img" style="zoom:50%;" />
 
 将点云表示成一个tensor，shape为K x 6，K是点云中点的数量，特征维度为(x,y,z,R,G,B)。全部坐标和颜色被标准化为[-1,1]。输入随机噪声K x 6，通过diffusion模型逐步denoising，生成点云。
 
@@ -75,14 +75,14 @@ upsampler模型采用和base模型相同的架构。对于低分辨率的point c
 
 PointE可以基于复杂的Prompts生成高质量的3D shapes。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/2.jpg" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/2.jpg" alt="img" style="zoom:50%;" />
 
 失败的例子：
 
 1. 错误地理解不同部分的相对比例，导致生成了一个高的狗而非短的长的狗。
 2. 不能推理出被遮挡的部分
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/3.jpg" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/3.jpg" alt="img" style="zoom:50%;" />
 
 #### Model Scaling and Ablations
 
@@ -90,7 +90,7 @@ PointE可以基于复杂的Prompts生成高质量的3D shapes。
 2. 使用一个单一的token编码图像CLIP embedding比使用多个token编码CLIP embedding产生更差的结果
 3. 扩大模型可以加速收敛，增大CLIP R-Presicion结果。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/4.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/4.jpg" alt="img" style="zoom:67%;" />
 
 ## PC2
 
@@ -102,7 +102,7 @@ PointE可以基于复杂的Prompts生成高质量的3D shapes。
 >
 > 代码：https://github.com/lukemelas/projection-conditioned-point-cloud-diffusion
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/5.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/5.jpg)
 
 ### 概览
 
@@ -135,7 +135,7 @@ diffusion-point-cloud和 Point-Voxel Diffusion (PVD)提出了相似的生成范�
 
 因为diffusion的概率特性，可以针对一张图片生成多个可信的点云，引入一个过滤步骤来帮助解决单视角3D重构中的不适应性。具体来说，根据给定的图像生成多个点云，通过它们和输入mask的匹配程度来过滤掉某些点云，使生成样本的质量更高。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/6.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/6.jpg)
 
 #### Point Cloud Diffusion Models
 
@@ -143,7 +143,7 @@ diffusion-point-cloud和 Point-Voxel Diffusion (PVD)提出了相似的生成范�
 
 具体来说，网络被训练来预测噪声 $\epsilon \in R^{3N}$，使用L2 loss来监督：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/7.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/7.jpg)
 
 在推理阶段，从一个三维高斯分布中随机采样点云（`x_t = torch.randn(B,N,D）`），进行逆向扩散过程生成样本 $X_0$。
 
@@ -155,7 +155,7 @@ diffusion-point-cloud和 Point-Voxel Diffusion (PVD)提出了相似的生成范�
 
 本文创造PC2（projection-conditional diffusion models）。下图展示global condition和pc2的结果对比，可以看出PC2比global condition在F-scores指标上提高不少。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/8.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/8.jpg)
 
 PC2首先使用一个标准2D图像模型（CNN或者ViT，本文用的是MAE-ViT）提取图像特征，2D图像经过图像模型提取后的特征为 $I \in R^{H\times W \times C}$。
 
@@ -192,40 +192,40 @@ PC2的color生成过程利用single-step模型，因为作者发现颜色模型�
 
 F-score来评估。对于两个点云 $X$和 $\hat X$，和一个固定的阈值距离d，公式为：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/9.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/9.jpg)
 
 其中 $P_d$和 $R_d$表示precision和recall。 $d$是一个固定的阈值距离，本文follow之前的工作，取d=0.01。precision和recall计算公式如下（P(d)：生成点云中的所有点逐个来看，如果真实点云中点和此点的最小距离小于d，将其求和取平均；R(d):真实点云中的所有点逐个来看，如果生成点云中点和此点的最小距离小于d，将其求和取平均）：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/10.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/10.jpg)
 
 #### Quantitative Results
 
 ShapeNet-R2N2数据集上，没有过滤的情况下，PC2和之前工作差不多性能。通过检查不同类别的性能，我们可以看到PC2在具有更精细的细节相关的对象的类别上表现更好，如“步枪”和“飞机”。在过滤的情况下，PC2-FM达到SOTA结果。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/11.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/11.jpg)
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/12.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/12.jpg)
 
 #### Qualitative Results
 
 图3和图4展示了PC2在真实世界数据集Co3D上的定性结果。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/13.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/13.jpg)
 
 因为NeRF-WCE的生成是固定的,它很难对高程度不确定的区域进行建模，为远离参考视图的新视图生成模糊的图像。与之对比，PC2从任何视角都能产生真实的物体形态：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/14.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/14.jpg)
 
 #### Diversity of Generations
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/15.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/15.jpg)
 
 #### Filtering Analysis
 
 Oracle根据F-score选择最佳样本，提供了性能上界。PC2-FM相比PC2-FA提升更多。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/16.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/16.jpg)
 
 当过滤不同数量的图片时，性能如下：仅仅使用2张图片进行过滤就可以极大地提升结果，添加额外的图像得到更高的性能提升。增大过滤可选择样本数可以进一步提高性能，但回报递减。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/7-diffusion-models/17.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/7-diffusion-models/17.jpg)

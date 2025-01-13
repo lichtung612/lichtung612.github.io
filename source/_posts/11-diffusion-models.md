@@ -26,7 +26,7 @@ tag:
 
 DiT采用**IDDPM**方法（IDDPM解读见https://lichtung612.github.io/posts/2-diffusion-models/ ），同时预测模型的**噪声和方差**。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/9-diffusion-models/0.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/9-diffusion-models/0.jpg)
 
 ### Patchify
 
@@ -38,7 +38,7 @@ DiT的输入是一个空间潜在表示 z（对于256x256x3的图像来说，z�
 
 其中，token的数量T由patch size超参数p来决定。token数量增大2倍，至少使总的Gflops增大4倍，但是不会影响下游参数数量。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/9-diffusion-models/1.jpg" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/9-diffusion-models/1.jpg" alt="img" style="zoom:50%;" />
 
 ### DiT block design
 
@@ -51,7 +51,7 @@ DiT的输入是一个空间潜在表示 z（对于256x256x3的图像来说，z�
 
 实验发现，adaLN-Zero方法效果最好。【“虽然DiT发现adaLN-Zero效果最好，但这种方式可能只适合只有类别信息的简单条件嵌入，因为只需要引入一个class embedding；对于文生图来说，其条件往往是序列的text embeddings，采用cross-attention方案可能更合适”】
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/9-diffusion-models/2.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/9-diffusion-models/2.jpg" alt="img" style="zoom:67%;" />
 
 >  https://github.com/facebookresearch/DiT/blob/main/models.py#L101
 
@@ -126,12 +126,12 @@ class DiTBlock(nn.Module):
 
 设计了4种大小的模型：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/9-diffusion-models/3.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/9-diffusion-models/3.jpg" alt="img" style="zoom:67%;" />
 
 探究模型的缩放能力，发现模型计算量对生成效果至关重要，计算量越大，生成质量越高：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/9-diffusion-models/4.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/9-diffusion-models/4.jpg" alt="img" style="zoom:67%;" />
 
 性能上，最大的模型在classifier free guidance下可以达到sota：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/9-diffusion-models/5.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/9-diffusion-models/5.jpg" alt="img" style="zoom:80%;" />

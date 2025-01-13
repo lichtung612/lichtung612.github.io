@@ -22,7 +22,7 @@ tag:
 
 ## 方法
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/4-diffusion-models/0.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/4-diffusion-models/0.jpg" alt="img" style="zoom:80%;" />
 
 ## 代码
 
@@ -36,11 +36,11 @@ tag:
   - Tokenize and encode the text
     - tokenizer：根据一个vocab.json表，把文本编码成token数字和attention_mask矩阵。比如输入prompt为“A dragon fruit wearing karate belt in the snow”，则经过tokenizer编码：
       
-      ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/4-diffusion-models/1.jpg)
+      ![img](https://files.hoshinorubii.icu/lichtung612/2024/4-diffusion-models/1.jpg)
       
-      ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/4-diffusion-models/2.jpg)
+      ![img](https://files.hoshinorubii.icu/lichtung612/2024/4-diffusion-models/2.jpg)
       
-      ![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/4-diffusion-models/3.jpg)
+      ![img](https://files.hoshinorubii.icu/lichtung612/2024/4-diffusion-models/3.jpg)
       
       其中tokenizer过程中一个词不一定代表一个token，当这个词在vocab中没有出现的时候它会对其进行分词，所以有可能一个词对应两个单词。空格字符也是token的一部分。stable diffusion限制最大token数是77。
       

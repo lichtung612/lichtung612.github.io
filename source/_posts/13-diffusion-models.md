@@ -19,7 +19,7 @@ tag:
 
 ## 任务
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/12-diffusion-models/0.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/12-diffusion-models/0.jpg)
 
 给定针对特定主题的输入图像（通常3-5张）和文本提示，通过diffusion model可以生成该主题在其他语义下的图像。生成结果可以自然和环境交互，具有多样性和高保真度。
 
@@ -37,7 +37,7 @@ tag:
 
 训练损失函数：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/12-diffusion-models/1.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/12-diffusion-models/1.jpg)
 
 ### Personalization of Text-to-Image Models
 
@@ -59,11 +59,11 @@ DreamBooth微调模型的所有层，包括text embeddings。这会导致两个�
 
 - Language drift：在大规模文本语料中预训练的模型，之后在很小的数据中微调，会导致模型丢掉一些语义理解，只会生成该主题图片，忘记如何生成同个类别的其他主题图片。（只会生成某只狗，不会生成其他狗）
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/12-diffusion-models/2.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/12-diffusion-models/2.jpg)
 
 - Reduced output diversity：模型因为反复使用几张图像微调，可能会过拟合，导致输出多样性降低。如下图第二行所示，输出的狗全部都是和输入一样的趴着的姿态。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/12-diffusion-models/3.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/12-diffusion-models/3.jpg)
 
 提出**class-specific prior preservation loss**来解决上述问题。
 
@@ -71,8 +71,8 @@ DreamBooth微调模型的所有层，包括text embeddings。这会导致两个�
 
 使用prompt:"a [class noun]"通过预训练好的diffusion model生成数据集 $x_{pr}$。损失表示为：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/12-diffusion-models/4.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/12-diffusion-models/4.jpg)
 
 其中第一项为模型原本的损失，添加第二项prior-preservation term来使用模型自身生成的图像监督模型训练，其中 $\lambda$控制第二项的权重。如下图所示表示模型训练过程：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/12-diffusion-models/5.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/12-diffusion-models/5.jpg)

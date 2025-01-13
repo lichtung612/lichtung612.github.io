@@ -26,13 +26,13 @@ tag:
 
 如下图所示，从一个分布z中采样一个vector出来，通过网络，生成一张图片；所有采样到的vector生成的图片可以得到一个分布。目的是学习到这个网络，使生成图像的分布和真实图像分布接近。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/17.PNG" alt="图像生成模型：从一个分布z中采样一个vector出来，通过网络，生成一张图片；所有采样到的vector生成的图片可以得到一个分布。目的是学习到这个网络，使生成图像的分布和真实图像分布接近。" style="zoom: 50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-diffusion-models/17.PNG" alt="图像生成模型：从一个分布z中采样一个vector出来，通过网络，生成一张图片；所有采样到的vector生成的图片可以得到一个分布。目的是学习到这个网络，使生成图像的分布和真实图像分布接近。" style="zoom: 50%;" />
 
 ### 最大化最大似然估计=最小化KL散度
 
 从分布 $z$中采样vector,送入网络 $\theta$产生 $x$，可以得到一个分布 $P_\theta(x)$。真实的训练数据集的分布是 $P_{data}(x)$，从真实的分布中采样 $x^1,x^2,..,x^m$，目的是让从学习到的分布 $P_\theta(x)$产生 $x^i$的概率最大。$P_\theta(x^i)$即分布 $P_\theta$产生 $x^i$的概率。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/14.PNG" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-diffusion-models/14.PNG" alt="img" style="zoom:67%;" />
 
 （推导思路：连乘->加log变成连加->转换成分布概率公式->减去真实分布->KL散度）
 
@@ -44,7 +44,7 @@ tag:
 
 **训练**
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/0.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/1-diffusion-models/0.jpg)
 
 总体来看，训练过程将图像添加噪声变成噪声图，之后将噪声图和时间步输入模型，模型来预测噪声。
 
@@ -52,7 +52,7 @@ tag:
 
 **推理**
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/1.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/1-diffusion-models/1.jpg)
 
 总体来说，给定一个噪声图，推理过程每一步预测噪声图的噪声，将噪声图去噪还原成更接近原图的图，之后重复步骤，生成越来越清晰的图像。
 
@@ -132,11 +132,11 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
 
 由于 $x_{t-1}$是我们关注的变量，整理成 $x_{t-1}$的形式：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/2.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/1-diffusion-models/2.jpg)
 
 由正态分布满足 $f(x) \propto exp -\frac{x^2+u^2-2xu}{\sigma^2}$，则：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/3.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/1-diffusion-models/3.jpg)
 
 又因为 $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$，把u里面的 $x_0$换掉，得：
 
@@ -160,7 +160,7 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
   - DDPM中的正向过程是固定好的人为设计的encoder，把原图变成噪声图的过程不是学习得到的
   - DDPM中潜在噪声图（隐变量）的维度和图像本身相同，而VAE中潜在空间一般会降低维度
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/4.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/1-diffusion-models/4.jpg)
 
 #### 变分下界角度推导VAE和DDPM
 
@@ -174,19 +174,19 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
 
 第三行展开，得到右边是一项KL散度，KL散度一定大于等于0，则得到下界。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/15.png" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-diffusion-models/15.png" alt="img" style="zoom:67%;" />
 
 2. DDPM
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/16.png" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-diffusion-models/16.png" alt="img" style="zoom:50%;" />
 
 进一步化简:
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/5.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/1-diffusion-models/5.jpg)
 
 即优化下面这个式子，让这个式子越大越好：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/6.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/1-diffusion-models/6.jpg" alt="img" style="zoom:67%;" />
 
 其中该等式第二项是diffusion的前向过程，不是网络学习到的，所以可以不看；第一项和第三项的计算过程很像，以第三项为例，由“推理过程原理部分”推导出 $q(x_{t-1}|x_t,x_0)$是一个高斯分布，满足 $N（\frac{1}{\sqrt{\alpha_t}}(x_t-\frac{1-\alpha_t}{\sqrt{1-\bar\alpha_t}}\epsilon),\frac{(1-\alpha_t)(1-\bar\alpha_{t-1})}{1-\bar\alpha_t}）$。为了使最大似然概率更大，则应该使第三项KL散度越小越好，则 $P(x_{t-1}|x_t)$应该尽可能和分布 $N（\frac{1}{\sqrt{\alpha_t}}(x_t-\frac{1-\alpha_t}{\sqrt{1-\bar\alpha_t}}\epsilon),\frac{(1-\alpha_t)(1-\bar\alpha_{t-1})}{1-\bar\alpha_t}）$类似。得出和“推理过程原理”部分相同的结论。
 
@@ -194,7 +194,7 @@ $x_t = \sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$
 
 扩散模型的核心在于训练噪音预测模型，采用一个基于residual block和attention block的U-Net模型。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/7.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/1-diffusion-models/7.jpg)
 
 U-Net属于encoder-decoder架构。每个stage包含2个residual block，部分stage还加入了自注意力模块增加网络全局建模能力。添加time embedding模块将时间步编码到网络中（采用和transformer相同的正余弦函数编码方式），具体来说，DDPM在各个残差块都引入了time embedding。
 
@@ -255,7 +255,7 @@ t = torch.randint(0,timesteps,(batch_size,),device=device).long()
 
   和transformer类似，transformer中的位置编码函数：
 
-  <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/4.png" alt="img" style="zoom:50%;" />
+  <img src="https://files.hoshinorubii.icu/lichtung612/2024/03/29/4.png" alt="img" style="zoom:50%;" />
 
   相当于偶数位置采用sin函数，奇数位置采用cos函数。其中公共部分可以如下推导：
 
@@ -389,7 +389,7 @@ img = torch.randn(shape,device=device)  #img [b,c,h,w]
 
   推理算法中给出的公式如下，实际实现时采用的公式是未将 $x_0$替换的版本，并且对 $x_0$做了clip操作（将 $x_0$中的元素限制在-1和1之间），使用的是对数方差再取指数e（对数方差限制最小值为0）：
 
-  <img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/9.png" alt="img" style="zoom:67%;" />
+  <img src="https://files.hoshinorubii.icu/lichtung612/2024/03/29/9.png" alt="img" style="zoom:67%;" />
 
   ```python
   model_mean, _, model_log_variance = self.p_mean_variance(model,x_t,t,
@@ -439,11 +439,11 @@ img = torch.randn(shape,device=device)  #img [b,c,h,w]
 
 - 生成结果
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/6.png" alt="img" style="zoom: 33%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/03/29/6.png" alt="img" style="zoom: 33%;" />
 
 - 逐步结果
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/7.png" alt="img" style="zoom: 33%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/03/29/7.png" alt="img" style="zoom: 33%;" />
 
 - 使用重参数化公式 $x_t =\sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$一步计算得到 $x_0$的结果
 
@@ -453,7 +453,7 @@ img = torch.randn(shape,device=device)  #img [b,c,h,w]
 
 
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/8.png" alt="img" style="zoom: 25%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/03/29/8.png" alt="img" style="zoom: 25%;" />
 
 ## DDIM
 
@@ -502,9 +502,9 @@ DDIM（denoising diffusion implicit models)和DDPM有相同的训练目标，但
 - 当 $\sigma = 0$，采样过程不再具有随机性，每个 $x_T$对应了确定的 $x_0$。
 - 若 $\sigma = \frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t}\beta_t$（  $= \frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t}(1-\frac{\bar\alpha_t}{\bar\alpha_{t-1}})$)，则是DDPM中采用的方差，此时**DDIM等价于DDPM**。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/10.png" alt="img" style="zoom: 50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/03/29/10.png" alt="img" style="zoom: 50%;" />
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/11.png" alt="img" style="zoom:50%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/03/29/11.png" alt="img" style="zoom:50%;" />
 
 ### 代码
 
@@ -576,7 +576,7 @@ for i in tqdm(reversed(range(0, ddim_timesteps)), desc='sampling loop time step'
 
 - 20步，ddim_eta=0时的生成效果：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/03/29/12.png" alt="img" style="zoom: 33%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/03/29/12.png" alt="img" style="zoom: 33%;" />
 
 ### 特性
 
@@ -584,5 +584,5 @@ for i in tqdm(reversed(range(0, ddim_timesteps)), desc='sampling loop time step'
 
 当方差为0时，生成过程是确定的，只受 $x_T$影响。给定不同的 $x_T$，不同的采样步数下生成的图片都是类似的， $x_T$可以看作生成图片的隐编码信息。（在实际生成图片时可以控制 $x_T$不变，设置较小的采样步数，若生成的图片是想要的，再用更大的步数生成更精细的图片）。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/1-diffusion-models/8.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/1-diffusion-models/8.jpg)
 

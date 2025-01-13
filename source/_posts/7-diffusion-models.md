@@ -31,7 +31,7 @@ tag:
 
 下表可以看出，SDXL-VAE的性能最强。其中，因为SD-VAE 2.x和1.x的区别仅仅是微调了decoder部分，所以SD-VAE 1.x和SD-VAE 2.x的encoder部分权重相同，latent分布一致，两个模型权重可以互相使用。而SDXL-VAE是完全重新训练的，latent分布发生改变，因此不可以将SDXL-VAE应用到SD 1.x和SD 2.x上。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/5-diffusion-models/0.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/5-diffusion-models/0.jpg)
 
 >  EMA（Exponential Moving Average)指数移动平均——给予近期数据更高权重的平均方法
 >
@@ -58,9 +58,9 @@ tag:
 
 ### U-Net
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/5-diffusion-models/1.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/5-diffusion-models/1.jpg)
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/5-diffusion-models/2.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/5-diffusion-models/2.jpg)
 
 - stage上，效率考虑，只采用3个阶段，意味着只进行2次下采样。之前的SD是使用4个阶段，包含3个下采样。
 - 将transformer blocks应用在更高的stage：第一个stage采用普通的DownBlock2D,而不是采用基于attention的CrossAttnDownBlock2D，主要是为了计算效率。
@@ -90,25 +90,25 @@ SDXL提出**将图像的原始尺寸(width and height)作为条件** $c_{size}=(
 
 下图展示了采用这种方案得到的512x512模型当送入不同的size时的生成图像对比，可以看到当输入低分辨率时，生成的图像比较模糊，但是当提升size时，图像质量逐渐提升，这表明模型已经学到了将条件 $c_{size}$与分辨率相关的图像特征关联起来，这可以用来修改与给定提示相对应的输出的质量。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/5-diffusion-models/3.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/5-diffusion-models/3.jpg" alt="img" style="zoom:67%;" />
 
 ### Cropping Parameters——图像裁剪问题
 
 目前文生图模型预训练往往采用固定图像尺寸（512x512或者1024x1024等），这就需要对原始图像进行预处理。这个处理流程一般是先将图像的最短边resize到目标尺寸，然后沿着图像的最长边进行裁剪（random crop或者center crop，确保图像长宽一致）。但是图像裁剪往往会导致图像出现缺失问题，如下图所示，SD1.5和SD2.1生成的猫出现头部缺失问题，就是训练过程中裁剪导致的。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/5-diffusion-models/4.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/5-diffusion-models/4.jpg" alt="img" style="zoom:80%;" />
 
 为了解决这个问题，SDXL也将训练过程中裁剪的坐标 $c_{top}$和 $c_{left}$(整数，分别指定从左上角沿高度和宽度裁剪的像素）作为额外的条件注入到UNet中，这个注入方式可以采用和图像原始尺寸一样的方式，即通过傅立叶编码并加在time embedding上。在推理时，我们只需要将这个坐标设置为(0, 0)就可以得到物体居中的图像（此时图像相当于没有裁剪）。
 
 下图展示了采用不同的crop坐标的生成图像对比，可以看到(0, 0)坐标可以生成物体居中而无缺失的图像，采用其它的坐标就会出现有裁剪效应的图像。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/5-diffusion-models/5.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/5-diffusion-models/5.jpg)
 
 ### 条件注入算法流程
 
 **训练数据的处理流程和之前是一样的**，只是要额外保存图像的原始width和height以及图像crop时的左上定点坐标top和left，将其作为参数传入模型中。注意，**sdxl虽然输入了size参数和crop参数，但是实际还是按照固定尺寸去训练的（把小分辨率调大，把大分辨率图像调小，把宽高不一致的图像裁剪），多的仅仅是输入size和crop，让模型知道它数据处理之前大致是什么样的）**。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/5-diffusion-models/6.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/5-diffusion-models/6.jpg" alt="img" style="zoom:80%;" />
 
 裁剪得到original size和crop top-left coord参数源码：
 
@@ -272,7 +272,7 @@ SDXL训练是一个多阶段的过程，首先采用基于上述的2种条件注
 
 SDXL所设置的buckets如下表所示，虽然不同的bucket的aspect ratio不同，但是像素总大小都接近1024x1024，相邻的bucket其height或者width相差64个pixels。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/5-diffusion-models/7.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/5-diffusion-models/7.jpg" alt="img" style="zoom:80%;" />
 
 在训练过程中，每个step在不同的buckets之间切换，每个batch内部的数据都来自相同的bucket。另外，在多尺度训练中，**SDXL也将bucket size即target size作为条件加入UNet中，**表示为 $c_{ar} = (h_{tgt},w_{tgt})$。这个条件注入方式和之前图像原始尺寸条件注入一样。将target size作为条件，让模型能够显示地学习到多尺度（或aspect ratio）。
 
@@ -282,17 +282,17 @@ SDXL所设置的buckets如下表所示，虽然不同的bucket的aspect ratio不
 
 SDXL级联了一个细化模型来进一步提升图像质量。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/5-diffusion-models/8.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/5-diffusion-models/8.jpg)
 
 SDXL在相同的latent space上（由同一个VAE编码）训练一个分离的LDM，它专注于高质量高分辨率的数据学习，只在**较低的noise level上**进行训练（noising-denoising过程的前200个时间步上）。
 
 推理时，首先从base模型上得到latents，之后利用扩散过程给此latent加一定的噪音，使用相同的text input在refiner模型上进一步去噪。经过这样一个重新加噪再去噪的过程，图像的局部细节会有一定的提升。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/5-diffusion-models/9.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/5-diffusion-models/9.jpg" alt="img" style="zoom:80%;" />
 
 refiner model和base model在结构上有一定的不同，其UNet的结构如下图所示：
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/5-diffusion-models/10.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/5-diffusion-models/10.jpg" alt="img" style="zoom:80%;" />
 
 - stage上：refiner model采用4个stage，第一个stage也是采用没有attention的DownBlock2D，网络的特征维度采用384，而base model是320
 - block上：refiner model的attention模块中transformer block数量均设置为4。refiner model的参数量为2.3B，略小于base model
@@ -302,11 +302,11 @@ refiner model和base model在结构上有一定的不同，其UNet的结构如�
 
 人工评价结果：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/5-diffusion-models/12.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/5-diffusion-models/12.jpg)
 
 FID分数不是很好：
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/5-diffusion-models/13.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/5-diffusion-models/13.jpg)
 
 模型局限：
 

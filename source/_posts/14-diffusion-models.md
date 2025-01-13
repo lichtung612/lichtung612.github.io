@@ -29,7 +29,7 @@ tag:
 
 ## 方法
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/14-diffusion-models/0.jpg" alt="img" style="zoom: 67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/14-diffusion-models/0.jpg" alt="img" style="zoom: 67%;" />
 
 ### Image Encoder
 
@@ -40,7 +40,7 @@ tag:
 
 在unet每一个cross attention block位置添加一个针对图像特征的cross attention block。其 $W_q $矩阵用来投影生成图像的特征，采用和文本cross attention block同样的$W_q $投影矩阵，不需要训练； $W_k$和 $W_v$矩阵用来投影参考图像特征，需要训练，初始化方式为和文本cross attention同样的$W_k$和 $W_v$，这样初始化可以更快收敛。简单地将image cross-attention和text cross-attention输出相加，得到最终输出。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/14-diffusion-models/1.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/14-diffusion-models/1.jpg)
 
 ### Training and Inference
 
@@ -66,17 +66,17 @@ $$Z^{new}=Attention(Q,K,V)+\lambda \cdot Attention(Q,K',V')$$
 
 IP-Adapter可以直接使用到其它基于相同基线模型的微调模型和adapter上。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/14-diffusion-models/2.jpg" alt="img" style="zoom: 67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/14-diffusion-models/2.jpg" alt="img" style="zoom: 67%;" />
 
 ### IP-Adapter+结构控制
 
 IP-Adapter可以和其它基于结构控制的方法兼容，如ControlNet。
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/14-diffusion-models/3.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/14-diffusion-models/3.jpg" alt="img" style="zoom:80%;" />
 
 ### Image-to-Image/Inpainting
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/14-diffusion-models/4.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/14-diffusion-models/4.jpg" alt="img" style="zoom:80%;" />
 
 ### 多模态prompts
 
@@ -84,4 +84,4 @@ IP-Adapter可以较好地完成image prompt和text prompt一起进行图像生�
 
 但是，本文也强调，尽管IP-Adapter可以集成参考图的内容和风格来生图，它**在维持主题一致性方面表现比较差**，不如Textual Inversion和DreamBooth效果更好。
 
-![img](https://lichtung612.eos-beijing-1.cmecloud.cn/2024/14-diffusion-models/5.jpg)
+![img](https://files.hoshinorubii.icu/lichtung612/2024/14-diffusion-models/5.jpg)

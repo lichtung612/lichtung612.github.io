@@ -32,20 +32,20 @@ Textual Inversion使用一个伪单词$S\*$来表示概念图像，目的是学�
 
 为了学习到伪单词S* 的text embedding，使用3-5张概念图像对此word embedding进行训练。训练目标即扩散模型的MSE损失。训练prompt为随机从CLIP ImageNet模版中采样的中性上下文文本，如“A photo of $S\*$”或者“A rendition of $S\*$”。word embedding被初始化为概念图像的单个粗略描述词的嵌入（如当想要生成特定的猫时，可以用“cat”的word embedding来初始化）
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/16-diffusion-models/0.jpg" alt="img" style="zoom:67%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/16-diffusion-models/0.jpg" alt="img" style="zoom:67%;" />
 
 ## 实验
 
 ### 主题生成
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/16-diffusion-models/1.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/16-diffusion-models/1.jpg" alt="img" style="zoom:80%;" />
 
 ### 风格迁移
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/16-diffusion-models/2.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/16-diffusion-models/2.jpg" alt="img" style="zoom:80%;" />
 
 ### 多概念生成
 
 模型可以同时对多个新的伪词进行推理。然而，它在处理这些概念之间的关系方面存在困难（它无法将两个概念并排放置，生成的都是以风格A生成概念B，不能生成概念A和概念B）。作者认为这是因为他们的训练仅考虑单个概念场景，在多概念场景上训练可能会缓解此缺陷。（感觉多主题生成本身也是文生图模型不擅长的地方。不考虑特定概念，baseline模型本身可能效果就比较差）
 
-<img src="https://lichtung612.eos-beijing-1.cmecloud.cn/2024/16-diffusion-models/3.jpg" alt="img" style="zoom:80%;" />
+<img src="https://files.hoshinorubii.icu/lichtung612/2024/16-diffusion-models/3.jpg" alt="img" style="zoom:80%;" />
